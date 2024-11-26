@@ -1,0 +1,27 @@
+project:
+  type: website
+
+website:
+  title: "CompCogSci Corner"
+  navbar:
+    left: 
+      - text: Home
+        icon: house
+        href: index.qmd
+      - text: Reading List
+        icon: journals
+        href: https://www.zotero.org/groups/5774007/ccs-unilu/library
+      - text: Course
+        icon: person-video3
+        href: about.qmd
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/ccs-unilu
+format:
+  html:
+    theme: simplex
+    css: assets/css/styles.css
+
+
+

@@ -1,0 +1,12 @@
+---
+title: "About"
+about:
+  template: jolla
+  links:
+    - icon: github
+      text: Github
+      href: https://github.com/ccs-unilu
+
+---
+
+Computational Cognitive Science corner at the University of Luxembourg.
