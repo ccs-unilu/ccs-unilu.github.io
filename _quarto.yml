@@ -13,7 +13,7 @@ website:
         href: https://www.zotero.org/groups/5774007/ccs-unilu/library
       - text: Course
         icon: person-video3
-        href: course/index.qmd
+        href: https://moodle.uni.lu/course/view.php?id=8159
     right:
       - about.qmd
       - icon: github
