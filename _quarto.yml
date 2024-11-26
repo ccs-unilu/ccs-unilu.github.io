@@ -13,7 +13,7 @@ website:
         href: https://www.zotero.org/groups/5774007/ccs-unilu/library
       - text: Course
         icon: person-video3
-        href: about.qmd
+        href: course/index.qmd
     right:
       - about.qmd
       - icon: github
