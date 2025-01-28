@@ -1,5 +1,5 @@
 ---
-title: "Computational Cognitive Science Course (Uni.lu)"
+title: "Computational Cognitive Science (Uni.lu)"
 listing:
   contents: blog
   sort: "date desc"
@@ -11,4 +11,4 @@ page-layout: full
 title-block-banner: true
 ---
 
-Welcome to the Computational Cognitive Science corner at the University of Luxembourg. We are a group of researchers interested in understanding the mind and brain using computational models and methods.
+Welcome to the Computational Cognitive Science corner at the University of Luxembourg. We are a group of researchers interested in understanding the mind and brain using computational models.

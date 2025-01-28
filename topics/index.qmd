@@ -1,5 +1,5 @@
 ---
-title: Useful Links
+title: Topics
 abstract: Here are some useful links that to learn more about different topics in computational cognitive science.
 abstract-title: ""
 ---

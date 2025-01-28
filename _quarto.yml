@@ -2,17 +2,17 @@ project:
   type: website
 
 website:
-  title: "CompCogSci Course"
+  title: "CompCogSci @ Uni.lu"
   navbar:
     left: 
       - text: Home
         icon: house
         href: index.qmd
-      - text: Useful Links
-        icon: bookmarks
-        href: links/index.qmd
-      - text: Zotero
+      - text: Topics
         icon: journals
+        href: topics/index.qmd
+      - text: Zotero
+        icon: bookmarks
         href: https://www.zotero.org/groups/5774007/ccs-unilu/library
       - text: Moodle
         icon: person-video3
