@@ -12,4 +12,4 @@ Dimension reduction is a technique to reduce the number of features in a dataset
 
 - [NeuroMatch Academy - Dimensionality Reduction (W1D4)](https://compneuro.neuromatch.io/tutorials/W1D4_DimensionalityReduction/student/W1D4_Intro.html)
 - [A friendly introduction to Principal Component Analysis](https://peterbloem.nl/blog/pca) by Peter Bloem
-- [Principal Component Analysis for Data Science Book (pca4ds)](https://pca4ds.github.io/)
+- [Principal Component Analysis for Data Science (pca4ds)](https://pca4ds.github.io/)
