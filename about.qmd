@@ -9,4 +9,4 @@ about:
 
 ---
 
-Computational Cognitive Science corner at the University of Luxembourg.
+Computational Cognitive Science course at the University of Luxembourg.

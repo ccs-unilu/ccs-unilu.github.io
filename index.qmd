@@ -1,5 +1,5 @@
 ---
-title: "Computational Cognitive Science Corner (Uni.lu)"
+title: "Computational Cognitive Science Course (Uni.lu)"
 listing:
   contents: blog
   sort: "date desc"

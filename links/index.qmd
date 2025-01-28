@@ -1,0 +1,15 @@
+---
+title: Useful Links
+abstract: Here are some useful links that to learn more about different topics in computational cognitive science.
+abstract-title: ""
+---
+
+
+## Dimensionality Reduction
+
+Dimension reduction is a technique to reduce the number of features in a dataset. It is useful for reducing the complexity of a dataset, compression, denoising, whitening, and visualization. Here are some resources to learn more about it:
+
+
+- [NeuroMatch Academy - Dimensionality Reduction (W1D4)](https://compneuro.neuromatch.io/tutorials/W1D4_DimensionalityReduction/student/W1D4_Intro.html)
+- [A friendly introduction to Principal Component Analysis](https://peterbloem.nl/blog/pca) by Peter Bloem
+- [Principal Component Analysis for Data Science Book (pca4ds)](https://pca4ds.github.io/)

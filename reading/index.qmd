@@ -1,8 +1,0 @@
----
-title: Reading List
----
-
-## Dimension Reduction
-
-- [A friendly introduction to Principal Component Analysis by Peter Bloem](https://peterbloem.nl/blog/pca)
-- [Principal Component Analysis for Data Science Book (pca4ds)](https://pca4ds.github.io/)
