@@ -1,2 +1,1 @@
-# Computational Cognitive Science Course at the University of Luxembourg
-
+# CompCogSci at Uni.lu
