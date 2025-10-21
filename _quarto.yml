@@ -14,9 +14,12 @@ website:
       - text: Zotero
         icon: bookmarks
         href: https://www.zotero.org/groups/5774007/ccs-unilu/library
-      - text: Moodle
+      - text: Moodle (2025)
         icon: person-video3
         href: https://moodle.uni.lu/course/view.php?id=8159
+      - text: Moodle (2026)
+        icon: person-video3
+        href: https://moodle.uni.lu/course/view.php?id=8492
     right:
       - about.qmd
       - icon: github
