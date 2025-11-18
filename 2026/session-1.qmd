@@ -1,0 +1,6 @@
+---
+title: Session 1
+abstract: Python Essentials for Computational Cognitive Sciences
+abstract-title: ""
+---
+

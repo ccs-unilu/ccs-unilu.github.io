@@ -3,14 +3,21 @@ project:
 
 website:
   title: "CompCogSci @ Uni.lu"
-  navbar:
-    left: 
+
+  sidebar:
+    align: center
+    style: docked
+    search: true
+    pinned: true
+    collapse-level: 2
+    contents:
       - text: Home
-        icon: house
         href: index.qmd
-      - text: Topics
-        icon: journals
-        href: topics/index.qmd
+      - section: "2026"
+        contents: "2026/*.qmd"
+      - text: "2025"
+        href: 2025/topics.qmd
+      - "---"
       - text: Zotero
         icon: bookmarks
         href: https://www.zotero.org/groups/5774007/ccs-unilu/library
@@ -20,13 +27,14 @@ website:
       - text: Moodle (2026)
         icon: person-video3
         href: https://moodle.uni.lu/course/view.php?id=8492
-    right:
-      - about.qmd
       - icon: github
+        text: GitHub
         href: https://github.com/ccs-unilu
+      - href: about.qmd
+        icon: info-circle
 format:
   html:
-    theme: simplex
+    theme: cosmo
     css: assets/css/styles.css
     link-external-icon: true
     link-external-newwindow: true
