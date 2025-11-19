@@ -1,6 +1,6 @@
 ---
-title: 2025 Topics
-subtitle: Useful links that to learn more about different topics in computational cognitive sciences
+title: Useful Links
+subtitle: Learn more about different topics in computational cognitive sciences
 abstract-title: ""
 ---
 

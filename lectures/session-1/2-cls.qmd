@@ -1,0 +1,18 @@
+---
+title: <i class="bi bi-patch-question"></i> Classification
+order: 2
+---
+
+Many cognitive experiments result in datasets where each trial contains features about the stimulus or condition and an outcome such as correct/incorrect. These datasets raise a central question:
+
+- Given the features of a trial, can we predict the participant's response?
+
+This also applies to questionnaires. Questionnaires produce multiple numeric or categorical responses per participant, often forming patterns that are not obvious by simple inspection. Research question we often want to answer is:
+
+- Can we predict or classify participants based on their responses?
+
+Raw behavioral data (e.g., stimulus condition, reaction time, accuracy, likert response) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover structure in the data and make predictions from it.
+
+A simple yet powerful solution is to treat this as a classification problem. Using tools from the ML libraries, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between input features and behavioral outcomes.
+
+By training on labeled data (features + known outcomes), the model can learn to classify new trials or participants based on their features alone.
