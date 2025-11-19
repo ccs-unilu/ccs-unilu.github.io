@@ -1,5 +1,5 @@
 ---
-title: "Computational Cognitive Science (Uni.lu)"
+title: "CompCogSci Course"
 page-layout: full
 ---
 

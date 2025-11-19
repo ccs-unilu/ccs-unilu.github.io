@@ -9,17 +9,22 @@ website:
     style: docked
     search: true
     pinned: true
-    collapse-level: 2
+    collapse-level: 1
     contents:
       - text: Home
         href: index.qmd
+      - "---"
       - section: "Lectures"
         contents: "lectures/**/*.qmd"
+      - "---"
       - section: "Resources"
         contents:
           - text: Useful Links
             icon: link-45deg
             href: links.qmd
+          - icon: github
+            text: GitHub
+            href: https://github.com/ccs-unilu
           - text: Zotero
             icon: bookmarks
             href: https://www.zotero.org/groups/5774007/ccs-unilu/library
@@ -29,9 +34,6 @@ website:
           - text: Moodle (2026)
             icon: person-video3
             href: https://moodle.uni.lu/course/view.php?id=8492
-          - icon: github
-            text: GitHub
-            href: https://github.com/ccs-unilu
 
 format:
   html:

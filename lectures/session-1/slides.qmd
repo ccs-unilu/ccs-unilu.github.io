@@ -1,0 +1,473 @@
+---
+title: "Essential Python"
+format: revealjs
+execute:
+    echo: true
+number-sections: false
+---
+
+Welcome to the Essential Python lecture for Computational Cognitive Sciences!
+
+We will cover the basics of Python programming that are essential for data analysis and modeling in cognitive sciences.
+
+
+## Python as Calculator
+
+```{python}
+2 + 3 * 5
+```
+
+## Integer division
+
+```{python}
+print(5/2)   # float division
+print(5//2)  # floor division
+print(5 % 2) # remainder
+```
+
+## Exercise
+
+- How many milliseconds are in 7.5 hours?
+- What is the remainder when 987 is divided by 23?
+
+Write your answer in a code cell.
+
+## Variables
+
+```{python}
+weight = 55
+height = 1.65
+b = weight
+b *= 2
+b /= height ** 2
+x, y = "Bel", "Val"
+
+print(f"Hello, {x}{y}!")
+```
+
+## Exercise
+
+- Run `%whos` in a code cell to see the list of defined variables.
+- What does the following code do?
+```{python}
+x = 10
+y = 20
+temp = x
+x = y
+y = temp
+```
+
+- Swap the contents of x and y using multiple assignment, not a temporary variable.
+
+
+## Basic Data Types
+
+- string
+- integer
+- float
+- boolean (True/False)
+
+## String
+
+```{python}
+s1 = 'Hello, World!'
+s2 = "Hello, World!"
+s3 = """This is
+a multiline
+string."""
+```
+
+## Formatted String
+
+```{python}
+name = "Cognitive Science"
+s4 = f"Hello, {name}!"
+print(s4)
+```
+
+## Template Strings (Python 3.14+)
+```{python}
+from string import Template
+t = Template("Hello, $name!")
+s5 = t.substitute(name="Cognition")
+print(s5)
+```
+
+```{python}
+len("Cognition")
+list("brain")
+int("42")
+float("3.14")
+```
+
+## or string methods
+
+```{python}
+"hello".upper()
+"   spaced   ".strip()
+"cog sci".split()
+"-".join(["a", "b", "c"])
+```
+
+
+## Escape sequence and raw string
+
+```
+print("Line1\nLine2\tTabbed")
+r"C:\folder\new_file.txt"
+```
+
+## Exercise
+
+- Turn "computational" into a list of characters.
+- Reverse the string "neuroscience" using slicing.
+
+
+## Built-in Functions
+
+```{python}
+type(height)
+round(3.14159, 2)
+print("Done!")
+```
+
+## Exercise
+
+- Using weight and height, compute BMI with: $BMI = weight \over height^2$
+
+
+## Built-in functions
+
+```{python}
+# This is a comment
+help(len)
+dir(str)
+```
+
+## Error Messages
+
+```{python}
+#| error: true
+# this causes an error
+5 + "a"
+```
+
+## List
+
+```{python}
+numbers = [1, 4, 9]
+mixed = [1, "a", [10, 20]]
+```
+
+```{python}
+len(numbers)
+numbers[0]
+numbers[-1]
+numbers[0:2]
+
+numbers.append(16)
+numbers.extend([25, 36])
+numbers.insert(1, 2)
+```
+
+
+## Exercise
+
+- Create a list of participant IDs: ['P1', 'P2', ..., 'P10'] using a loop or list comprehension.
+
+
+## Modules
+
+```{python}
+import math
+math.sqrt(16)
+
+import time
+print(time.ctime())
+```
+
+
+## Exercise
+
+- `import this` and read the Zen of Python. What are your favorite principles?
+
+
+## Loops
+
+```{python}
+for item in ["a", "b", "c"]:
+    print(item)
+
+for i, item in enumerate(["a", "b", "c"]):
+    print(i, item)
+```
+
+## While loop
+
+```{python}
+x = 3
+while x > 0:
+    print(x)
+    x -= 1
+```
+
+## Conditions
+
+```{python}
+age = 20
+if age < 18:
+    print("Minor")
+elif age < 65:
+    print("Adult")
+else:
+    print("Senior")
+```
+
+
+## match-case (Python 3.10+)
+
+```{python}
+status = 200
+match status:
+    case 200:
+        print("OK")
+    case 404:
+        print("Not found")
+```
+
+## list comprehension
+
+```{python}
+[x**2 for x in range(5)]
+```
+
+## Exercise
+
+- Use a list comprehension to extract all even numbers from range(1, 50).
+
+
+## Files
+
+## Upload files to Colab
+
+```
+from google.colab import files
+uploaded = files.upload()
+```
+
+
+## read a file
+
+```python
+f = open('example.txt', 'r')
+contents = f.read()
+f.close()
+```
+
+## or safer using 'with':
+
+```python
+with open('example.txt', 'r') as f:
+    contents = f.read()
+```
+
+## matching file names
+
+```python
+import glob
+glob.glob("*.txt")
+```
+
+## Exercise
+
+- Find all `.csv` files in the current directory using `glob`.
+
+
+## Pandas
+
+```python
+import pandas as pd
+
+df = pd.read_csv("yourfile.csv")
+df.head()
+df.info()
+df.describe()
+```
+
+## Plotting with Pandas
+
+```python
+df.hist()
+```
+
+## Or with seaborn
+
+```python
+import seaborn as sns
+sns.scatterplot(data=df, x="col1", y="col2")
+```
+
+
+## Exercise
+
+Load a CSV file and:
+
+- Show the first 5 rows.
+- Plot a histogram of one numeric column.
+- Compute the mean of any numeric variable.
+
+
+## NumPy
+
+```python
+import numpy as np
+
+arr = np.array([1, 2, 3, 4])
+arr_2d = np.array([[1,2,3],[4,5,6]])
+arr_2d.shape
+arr_2d[0,1]
+arr_2d[:,1]
+```
+
+
+## stats
+
+```python
+np.mean(arr)
+np.mean(arr_2d, axis=0)
+```
+
+
+## generate random numbers
+
+```python
+np.random.seed(42)
+np.random.normal(loc=0, scale=1, size=5)
+np.random.choice([0,1], size=10)
+```
+
+## Exercise
+
+- Simulate 100 response times from a normal distribution (mean=500 ms, SD=80 ms) and compute: mean, min, max, and standard deviation.
+- remove invalid RTs (< 0 ms)
+- Now simulate 100 response times from a lognormal distribution (mean=6, sigma=0.2). Compute the same statistics.
+
+
+## functions
+
+```python
+def bmi(weight, height=1.90):
+    """Compute BMI."""
+    return weight / (height**2)
+
+bmi(60, 1.65)
+```
+
+
+## scope
+
+```{python}
+x = "global"
+
+def f():
+    x = "f"
+    print("x=", x)
+
+def g():
+    global x
+    x = "g"
+    print("x=", x)
+
+f()
+print("x=", x)
+g()
+print("x=", x)
+
+```
+
+
+## Exercise
+
+- Write a function `zscore(x, mean, std)` that returns the z-score.
+
+## error handling
+
+```python
+try:
+    x = int("abc")
+except ValueError:
+    print("Invalid integer!")
+finally:
+    print("Done")
+```
+
+
+## assertion
+
+```python
+def sqrt(x):
+    assert x >= 0, "x must be non-negative"
+    return x**0.5
+```
+
+
+## standard libraries
+
+```{python}
+import math
+print(math.pi)
+print(math.sqrt(9))
+```
+
+
+## os
+
+```{python}
+import os
+os.listdir()
+os.getcwd()
+```
+
+## sys
+
+```{python}
+import sys
+sys.version
+```
+
+
+## magic commands (Jupyter specific)
+
+```{python}
+%lsmagic
+```
+
+## time execution
+
+```{python}
+%%time
+sum(range(10_000_000))
+```
+
+
+# regular expressions
+
+```{python}
+import re
+re.findall(r"\d+", "RT=532ms, ACC=1")
+```
+
+
+## Exercise
+- Extract all floating-point numbers from: `RT=512.3 ms, RT=489.1 ms, RT=501.7 ms` using regex.
+
+## Version Control
+
+- Save this notebook to Google Drive
+- Access your Google Drive from Colab
+
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```

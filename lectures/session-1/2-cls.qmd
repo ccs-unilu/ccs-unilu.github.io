@@ -3,6 +3,8 @@ title: <i class="bi bi-patch-question"></i> Classification
 order: 2
 ---
 
+## Problem
+
 Many cognitive experiments result in datasets where each trial contains features about the stimulus or condition and an outcome such as correct/incorrect. These datasets raise a central question:
 
 - Given the features of a trial, can we predict the participant's response?
@@ -11,8 +13,135 @@ This also applies to questionnaires. Questionnaires produce multiple numeric or 
 
 - Can we predict or classify participants based on their responses?
 
-Raw behavioral data (e.g., stimulus condition, reaction time, accuracy, likert response) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover structure in the data and make predictions from it.
+Raw behavioral data (e.g., stimulus condition, reaction time, accuracy, likert responses) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover structure in the data and make predictions from it.
+
+## Solution
 
 A simple yet powerful solution is to treat this as a classification problem. Using tools from the ML libraries, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between input features and behavioral outcomes.
 
 By training on labeled data (features + known outcomes), the model can learn to classify new trials or participants based on their features alone.
+
+
+## Exercise
+
+Data Inspection
+
+- Load your dataset using `pd.read_csv()`.  
+- Display:  
+   - `.head()`  
+   - `.info()`  
+   - `.describe()`  
+- Identify which variables are:  
+   - Numerical  
+   - Categorical  
+   - Binary labels  
+
+
+preprocessing
+
+1. Convert categorical variables using:  
+   - `pd.get_dummies()` OR `sklearn.preprocessing.OneHotEncoder`
+2. Drop/investigate missing data  
+3. Convert boolean labels (e.g., `is_correct`) into {0, 1}  
+4. Visualize distributions of key variables  
+
+
+Feature extraction
+
+Create at least 3 new features, such as:
+
+- RT_z = (RT − mean) / std  
+- Average Likert score  
+- Condition difficulty coding (easy=0, hard=1)  
+- Response variability per participant  
+
+Train a Classifier
+
+from sklearn.linear_model import LogisticRegression
+Define X (features) and y (labels)
+Split into train/test
+Train the model
+Compute accuracy
+Print model coefficients
+
+
+Train a DecisionTreeClassifier
+Plot the tree structure using sklearn.tree.plot_tree
+Identify: The most informative features
+
+- cross validation: from sklearn.model_selection import cross_val_score
+
+Compute 5-fold cross-validation accuracy for any model.
+Report mean, min, max accuracy.
+
+
+evaluate
+
+Compute:
+confusion matrix
+precision
+recall
+F1
+
+from sklearn.metrics import confusion_matrix, classification_report
+
+
+ROC Curve
+from sklearn.metrics import RocCurveDisplay
+
+Plot the ROC curve.
+Compute AUC.
+
+
+Compare two models
+Compare Two Models
+
+Compare Logistic Regression vs Random Forest:
+Accuracy
+ROC AUC
+Confusion matrix
+Which performs better and why?
+
+
+Example task:
+
+Predict “high stress vs low stress”
+Predict “introvert vs extrovert”
+Predict “responded correctly vs incorrectly under high load”
+X = questionnaire responses
+y = participant category
+
+Run at least 2 classifiers.
+
+
+
+# HPO
+from sklearn.model_selection import GridSearchCV
+
+dimentionality reduction
+from sklearn.decomposition import PCA
+
+
+unbalanced data
+Apply:
+class weights
+SMOTE oversampling
+ROC-AUC evaluation
+
+
+Aggregate trial-level features into participant-level features.
+
+Example:
+Mean accuracy per condition
+RT variability
+Questionnaire subscale scores
+Train model to classify participants instead of trials.
+
+
+XAI
+
+SHAP values
+Permutation importance
+Partial dependence plots
+
+Which cognitive features drive the classification?

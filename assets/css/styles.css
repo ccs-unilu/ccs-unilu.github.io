@@ -1,1 +1,7 @@
 /* css styles */
+
+hr.sidebar-divider {
+  border-top: 1px solid #ccc;
+  margin-left: -1rem !important;
+  margin-right: -1rem !important;
+}

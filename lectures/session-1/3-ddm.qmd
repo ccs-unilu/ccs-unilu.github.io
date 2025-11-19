@@ -1,37 +1,107 @@
----
-title: <i class="bi bi-patch-question"></i> Drift–Diffusion Model
-order: 3
----
 
-## Problem
 
-In cognitive science, many experiments present participants with simple choices (left or right, yes or no, same or different). These decisions produce two key behavioral measures:
+## Exercise:
 
-- Accuracy (correct / incorrect)
-- Response time (how long it took to respond)
 
-However, raw behavioral data alone cannot explain why decisions were fast, slow, easy, or difficult. We need an explanatory model that links latent cognitive processes to the behavior we observe.
+### Load and clean the data
+- Load nback_data.csv into a pandas read_csv().
+- Ensure the following columns exist: subject_id, condition, response_time, is_correct, correct
+- Drop rows with missing or impossible values (negative RT, RT > 10 s)
+- Calculate the number of removed rows.
+- Keep only response times between 0.2 and 3.0 seconds.
 
-The Drift–Diffusion Model (DDM) describes decision making as a process of accumulating noisy evidence over time until a boundary is reached (to make a choice). The DDM has several key parameters that capture different aspects of the decision process:
+### Explore the data
 
-- Drift rate: how quickly evidence accumulates (task difficulty, stimulus strength)
-- Boundary separation: response caution or speed–accuracy tradeoff
-- Noise: trial-to-trial variability
-- Non-decision time: perceptual + motor delay
+- for each subject and condition, compute:
+  - mean RT for correct trials
+  - accuracy (proportion of correct trials)
+  - d-prime (using hit rate and false alarm rate)
+  - Compute mean/sd response time
+  - Plot accuracy, RT distribution using seaborn.barplot, histplot, and distplot
+  - Plot accuracy differences between conditions
 
-By simulating this dynamic process, the DDM can recreate the patterns seen in real behavior:
+- Bin response times into:
+    - fast (RT < 0.5s)
+    - medium (0.5–1.0s)
+    - slow (>1.0s)
+- Compute accuracy separately in each bin. What pattern do you observe?
 
-- Distributions of fast vs slow correct and error responses
-- Accuracy differences across conditions
-- Individual differences in decision strategies
+### Simulate DDM
 
-## Data
+- Define a function: simulate_ddm(v, a, t0, s, n_trials=500)
+    - drift rate v
+    - boundary separation a
+    - non-decision time t0
+    - diffusion constant s (noise level)
+    - returns simulated response times and correctness of the responses (1 or 0)
 
-- We will be using the example "nback_data.csv" dataset for this session.
-- The data consists of the following columns:
-    - subject_id: unique identifier for each participant
-    - condition: experimental condition (e.g., easy for 2-back, hard for 3-back)
-    - response_time: response time in seconds
-    - is_correct: whether the response was correct (True) or incorrect (False)
-    - correct: 1 for correct, 0 for incorrect
+You can use Euler–Maruyama or a simple random-walk approximation:
 
+```python
+    import numpy as np
+    def simulate_ddm(v, a, t0, s, n_trials=500):
+        rts = []
+        choices = []
+        dt = 0.01  # time step
+        for _ in range(n_trials):
+            x = 0  # starting point
+            time = 0
+            while True:
+                dx = v * dt + s * np.sqrt(dt) * np.random.randn()
+                x += dx
+                time += dt
+                if x >= a:
+                    rts.append(time + t0)
+                    choices.append(1)  # upper boundary
+                    break
+                elif x <= 0:
+                    rts.append(time + t0)
+                    choices.append(0)  # lower boundary
+                    break
+        return np.array(rts), np.array(choices)
+```
+
+    - Simulate easy condition (high drift)
+    - Simulate hard condition (low drift)
+    - Simulate caution decision maker: Low caution: a = 0.7; Medium caution: a = 1.0; High caution: a = 1.6. Keep drift constant (v = 1.0).
+
+    - How does accuracy change?
+    - How does RT change?
+    - Which is more sensitive: accuracy or RT?
+
+- Explore the effect of noise: Simulate with (s). How does noise change RT/accuracy?
+- How does non-decision time (t0) affect RT distribution?
+
+
+For each condition in the real dataset:
+- Compute empirical accuracy
+- Compute empirical median RT
+- Pick a drift rate that looks plausibly similar
+- Simulate a DDM with that drift
+- This is not parameter fitting yet, just intuition building.
+
+Individual differences:
+Pick one participant, and for that participant:
+- Compute accuracy in easy & hard condition
+- Estimate which parameter (drift vs boundary vs noise) is likely different
+- Write a 4–5 sentence explanation.
+
+- Explain:
+ - How drift changes behavior
+ - How boundary changes behavior
+ - How noise changes behavior
+ - Why non-decision time is essential
+- What mismatch you observed between real and simulated data
+
+Based on the following plot:
+
+Is drift high or low?
+Is caution high or low?
+Does noise seem large?
+Does it need a non-decision shift?
+
+
+Grid search:
+- Try drift values between 0.1 and 2.0 and find the one that best matches empirical accuracy.
+- Find which boundary value makes simulated RT median most similar to observed RT median.
+- Plot several random drift–diffusion paths for intuition.
