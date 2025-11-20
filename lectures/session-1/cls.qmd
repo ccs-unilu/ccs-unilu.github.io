@@ -1,5 +1,5 @@
 ---
-title: <i class='bi bi-patch-question'></i> Project
+title: <i class='bi bi-patch-question'></i> Example Project
 subtitle: Behavioral Data Classification
 order: 2
 sidebar: main
@@ -7,33 +7,55 @@ sidebar: main
 
 ## Context
 
-Many cognitive experiments result in datasets where each trial contains features about the stimulus or condition and an outcome such as correct/incorrect. These datasets raise a central question:
+Many cognitive experiments result in datasets where each trial contains 1) features about the stimulus and 2) responses from participants. This data raises a central question:
 
 - Given the features of a trial, can we predict the participant's response?
 
-This also applies to questionnaires. Questionnaires produce multiple numeric or categorical responses per participant, often forming patterns that are not obvious by simple inspection. Research question we often want to answer is:
+This also applies to questionnaires. Questionnaires produce multiple numeric or categorical responses per participant, often forming patterns that are not obvious by simple inspection. Here, research question we often want to answer is:
 
-- Can we predict or classify participants based on their responses?
+- Can we classify participants based on their responses?
 
 Raw behavioral data (e.g., stimulus condition, response time, accuracy, likert responses) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover useful structure in the data and make predictions from it.
 
 ## Approach
 
-A simple yet powerful solution is to treat this as a classification problem. Using tools from the ML, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between input features and behavioral outputs.
+A simple yet powerful solution is to treat this as a classification problem. Using machine learning, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between inputs (i.e., stimulus features) and outputs (i.e., labels or responses). By training the model on real data, he model can learn to classify new trials or participants based on their input features alone.
 
-By training on labeled data (features + labels), the model can learn to classify new trials or participants based on their features alone.
+## Data
 
+For this project, you can use any behavioral dataset you have access to. The provided example datasets comes from a task where participants respond to either emotional or neutral stimuli with varying intensity.
+
+
+The dataset is stored in the `emotion_clean.csv` file. Each row represents a single trial and contains:
+
+- `agent_id`: unique identifier for each participant
+- `trial_index`: incremental trial order for that participant
+- `stimulus_type`: emotional or neutral
+- `stimulus_intensity`: numerical value showing emotional strength
+- `response_time`: in seconds
+- `response_numeric`: Likert scale response (1-7) showing reported stress level
+- `accuracy`: correct (1) or incorrect (0)
+
+You can also find demographic and personality attributes for each participant in the `agents.csv` file. This includes:
+
+- `age`
+- `gender`
+- `extraversion_score`: Higher values (>60) show sociable, energetic, externally focused traits Lower values (<40) represent more introverted, reserved, internally focused traits.
+- `neuroticism_score`: Higher values indicate greater tendency toward stress sensitivity, worry, emotional reactivity. Lower values indicate emotional stability, calmness, and lower stress reactivity.
+- `is_extrovert`: binary label (1 = extrovert, 0 = introvert)
+- `is_high_neuroticism`: binary label (1 = high neuroticism, 0 = low neuroticism)
 
 ## TODO
 
-Choose a prediction task:
+Choose a prediction task, for example:
 - Predict "high stress vs low stress"
-- Predict "introvert vs extrovert"
+- Predict "introvert vs extrovert" participant
 - Predict "responded correctly vs incorrectly under high load"
 
-### Define X and y
-X = questionnaire responses
-y = participant category
+### Define input/output variables
+
+- X = features to use for prediction
+- y = label to predict
 
 ### Data inspection
 
@@ -45,10 +67,10 @@ y = participant category
 ### Preprocessing
 
 1. Convert categorical variables using:  
-   - `pd.get_dummies()` OR `sklearn.preprocessing.OneHotEncoder`
-2. Drop/investigate missing data
-3. Convert boolean labels (e.g., `is_correct`) into {0, 1}
-4. Use seaborn or pandas to visualize distributions of key variables  
+   - `pd.get_dummies()` OR `sklearn.preprocessing.OneHotEncoder`.
+2. Drop/investigate missing data.
+4. Use seaborn or Pandas to visualize distributions of key variables.
+3. If needed, convert boolean labels (e.g., `is_extrovert`) into {0, 1}.
 
 
 ### Feature extraction
@@ -57,35 +79,35 @@ Create at least 3 new features, such as:
 
 - `rt_z = (rt − mean) / std`  
 - Log-transform RTs: `log_rt = np.log(rt)`
-- Average Likert score
-- Condition difficulty coding (easy=0, hard=1)
+- Average Likert score per participant
+- Condition coding (e.g., emotional = 1, neutral = 0)
 - Response variability per participant
 
 ### Train a logistic regression
 
-- `from sklearn.linear_model import LogisticRegression`
-- Define X (features) and y (labels)
-- Split X and y into train/test
-- Train the model using X_train, y_train
-- Compute accuracy on X_test, y_test
-- Print model coefficients
+- `from sklearn.linear_model import LogisticRegression`.
+- Split X and y into train/test using `train_test_split` from `sklearn.model_selection`.
+- Train the model using X_train and y_train.
+- Compute accuracy on X_test and y_test.
+- Print model coefficients using `model.coef_`.
+
+### Train another model
+
+Now try another model: Decision Tree or Random Forest.
+
+- `from sklearn.tree import DecisionTreeClassifier`.
+- Train the model using X_train and y_train.
+- Compute accuracy on X_test and y_test.
+- Plot the tree structure using `sklearn.tree.plot_tree`.
+- Identify the most informative features.
 
 
-### Train a DecisionTreeClassifier
+### Evaluation
 
-- Plot the tree structure using `sklearn.tree.plot_tree`
-- Identify the most informative features
-
-
-### Model evaluation
-- cross validation: `from sklearn.model_selection import cross_val_score`
-- Compute 5-fold cross-validation accuracy.
-- Report mean, min, max accuracy.
-- Compute confusion matrix, precision, recall, F1. Use `from sklearn.metrics import confusion_matrix, classification_report`
-
-
-- ROC Curve: `from sklearn.metrics import RocCurveDisplay`
-- Plot the ROC curve and compute AUC.
+- cross validation: `from sklearn.model_selection import cross_val_score`.
+- Compute 5-fold cross-validation accuracy and report mean, min, max accuracy.
+- Compute confusion matrix, precision, recall, F1. Use `from sklearn.metrics import confusion_matrix, classification_report`.
+- Computer ROC AUC and plot ROC Curve: `from sklearn.metrics import RocCurveDisplay`.
 
 ### Model comparison
 
@@ -94,13 +116,15 @@ Create at least 3 new features, such as:
 
 ### Hyperparameter tuning
 
-- Compare different SVM kernels: linear, rbf, poly: `from sklearn.model_selection import GridSearchCV`
+- Train SVM: `from sklearn.svm import SVC`
+- Compare different SVM kernels: linear, rbf, poly.
+- You can use `from sklearn.model_selection import GridSearchCV`.
 
 
 ### Improve the model
 
-- Use dimensionality reduction: `from sklearn.decomposition import PCA`
-- Apply class imbalance techniques if needed: class weights, SMOTE oversampling, ROC-AUC evaluation
+- Use dimensionality reduction: `from sklearn.decomposition import PCA`.
+- Apply class imbalance techniques if needed: class weights, SMOTE oversampling, ROC-AUC evaluation.
 - Feature engineering: aggregate trial-level features into participant-level features. Examples:
    - Mean accuracy per condition
    - RT variability
