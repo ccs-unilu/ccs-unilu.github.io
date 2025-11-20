@@ -1,6 +1,9 @@
 ---
 title: <i class="bi bi-patch-question"></i> Example Project
 subtitle: Drift–Diffusion Model of Decision Making
+date: 2025-11-21
+date-format: "MMMM DD, YYYY"
+published-title: "Date"
 order: 3
 sidebar: main
 ---
@@ -16,13 +19,13 @@ However, raw behavioral data alone cannot explain why decisions were fast, slow,
 
 The Drift–Diffusion Model (DDM) describes decision making as a process of accumulating noisy evidence over time until a boundary is reached (to make a choice). The DDM has several key parameters that capture different aspects of the decision process:
 
-![](https://www.researchgate.net/publication/261998604/figure/fig1/AS:11431281247561069@1716880692181/Examples-of-trajectories-of-the-drift-diffusion-model-Two-decision-boundaries-0-and-a.tif)
+![](./figures/ddm.jpg){fig-align="center" width="75%"}
 
 
-- Drift rate: how quickly evidence accumulates (task difficulty, stimulus strength)
-- Boundary separation: response caution or speed–accuracy tradeoff
-- Noise: trial-to-trial variability
-- Non-decision time: perceptual + motor delay
+- **v**: drift rate (speed and quality of evidence, task difficulty, stimulus strength)
+- **a**: boundary separation (response caution, speed–accuracy tradeoff)
+- **t0**: non-decision time (perceptual encoding, motor delay)
+- **s**: diffusion constant (noise level, trial-to-trial variability)
 
 By simulating this dynamic process, the DDM can recreate the patterns seen in real behavior:
 
@@ -77,11 +80,12 @@ Now, it's your turn to explore the data and simulate the DDM!
 ### Simulate DDM
 
 - Define a function: `simulate_ddm(v, a, t0, s, n_trials)`, which takes as input:
-    - v: drift rate
-    - a: boundary separation
-    - t0: non-decision time
-    - s: diffusion constant (noise level)
-    - returns simulated response times and correctness of the responses (1 or 0)
+    - v: drift rate (speed and quality of evidence)
+    - a: boundary separation (caution/threshold)
+    - t0: non-decision time (perceptual encoding, motor delay)
+    - s: diffusion constant (noise level, randomness)
+
+- returns simulated response times and responses (1 or 0)
 
 You can use a simple random-walk approximation:
 

@@ -2,6 +2,9 @@
 title: <i class='bi bi-patch-question'></i> Example Project
 subtitle: Behavioral Data Classification
 order: 2
+date: 2025-11-21
+date-format: "MMMM DD, YYYY"
+published-title: "Date"
 sidebar: main
 ---
 

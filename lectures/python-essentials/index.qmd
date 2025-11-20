@@ -3,26 +3,24 @@ title: Python Essentials
 order: 1
 output-file: index
 subtitle: Essential Python for Computational Cognitive Sciences
-date: 2026-11-21
-date-format: "MMMM YYYY"
+date: 2025-11-21
+date-format: "MMMM DD, YYYY"
 published-title: "Date"
 ---
 
+### Course Materials
 
-[Slides](slides.qmd)
+- [Slides](slides.qmd)
 
-:::{.callout-tip appearance="simple"}
-
-## Research Problems
+### Example Projects
 In this session, we will use Python to address real research questions from cognitive sciences. Please have a look at the following pages for some suggestions:
 
-- [DDM](ddm.qmd)
-- [CLS](cls.qmd)
-:::
+- [DDM](ddm.qmd): Drift–Diffusion Model of Decision Making
+- [CLS](cls.qmd): Behavioral Data Classification
+
+You can download the example data files here: [projects-data.zip](projects-data.zip).
 
 
-::: {.callout-tip appearance="simple"}
+### Google Colab
 
-## Google Colab
 During the course, we are going to use [Google Colab](https://colab.google) for Python programming. You can login using your Google account and start coding right away without any installation.
-:::
