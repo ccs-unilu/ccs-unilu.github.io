@@ -6,6 +6,7 @@ format: revealjs
 execute:
     echo: true
 number-sections: false
+code-block-bg: true
 ---
 
 ## Welcome!
@@ -293,12 +294,15 @@ print(time.ctime())
 ## Loops
 
 ```{python}
+#| code-line-numbers: "1,2|4,5"
 for item in ["a", "b", "c"]:
     print(item)
 
 for i, item in enumerate(["a", "b", "c"]):
     print(i, item)
 ```
+
+## TODO
 
 - Create a list of participant IDs: ['P1', 'P2', ..., 'P10'] using a loop or list comprehension and list.append
 
@@ -621,4 +625,36 @@ from google.colab import drive
 drive.mount('/content/drive')
 ```
 
-- Save a csv file to your Drive
+## TODO
+
+- Create a random DataFrame and save it as CSV to your Drive
+
+## Scikit-learn
+
+```{.python code-line-numbers="3,4|5,6|7|8|9"}
+from sklearn.linear_model import LinearRegression
+import numpy as np
+X = np.array([[1], [2], [3], [4], [5],[6]])
+y = np.array([2, 3, 5, 7, 11, 13])
+train_X, test_X = X[:4], X[4:]
+train_y, test_y = y[:4], y[4:]
+model = LinearRegression()
+model.fit(X, y)
+predictions = model.predict(X)
+print(predictions)
+```
+
+## Cross-validation
+
+```{.python code-line-numbers="2"}
+from sklearn.model_selection import cross_val_score
+scores = cross_val_score(model, X, y, cv=3)
+print(scores)
+```
+
+
+
+## Next Steps
+
+- Practice!
+- See example projects on [ccs-unilu.github.io](https://ccs-unilu.github.io).

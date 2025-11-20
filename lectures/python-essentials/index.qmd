@@ -1,0 +1,28 @@
+---
+title: Python Essentials
+order: 1
+output-file: index
+subtitle: Essential Python for Computational Cognitive Sciences
+date: 2026-11-21
+date-format: "MMMM YYYY"
+published-title: "Date"
+---
+
+
+[Slides](slides.qmd)
+
+:::{.callout-tip appearance="simple"}
+
+## Research Problems
+In this session, we will use Python to address real research questions from cognitive sciences. Please have a look at the following pages for some suggestions:
+
+- [DDM](ddm.qmd)
+- [CLS](cls.qmd)
+:::
+
+
+::: {.callout-tip appearance="simple"}
+
+## Google Colab
+During the course, we are going to use [Google Colab](https://colab.google) for Python programming. You can login using your Google account and start coding right away without any installation.
+:::
