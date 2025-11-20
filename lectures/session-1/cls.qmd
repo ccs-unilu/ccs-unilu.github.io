@@ -1,9 +1,11 @@
 ---
-title: <i class="bi bi-patch-question"></i> Classification
+title: <i class='bi bi-patch-question'></i> Project
+subtitle: Behavioral Data Classification
 order: 2
+sidebar: main
 ---
 
-## Problem
+## Context
 
 Many cognitive experiments result in datasets where each trial contains features about the stimulus or condition and an outcome such as correct/incorrect. These datasets raise a central question:
 
@@ -13,135 +15,102 @@ This also applies to questionnaires. Questionnaires produce multiple numeric or 
 
 - Can we predict or classify participants based on their responses?
 
-Raw behavioral data (e.g., stimulus condition, reaction time, accuracy, likert responses) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover structure in the data and make predictions from it.
+Raw behavioral data (e.g., stimulus condition, response time, accuracy, likert responses) provide valuable information but do not automatically reveal the patterns that distinguish one response from another. We need a computational approach that can discover useful structure in the data and make predictions from it.
 
-## Solution
+## Approach
 
-A simple yet powerful solution is to treat this as a classification problem. Using tools from the ML libraries, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between input features and behavioral outcomes.
+A simple yet powerful solution is to treat this as a classification problem. Using tools from the ML, we can train a model such as logistic regression, decision trees, or SVM to learn the relationship between input features and behavioral outputs.
 
-By training on labeled data (features + known outcomes), the model can learn to classify new trials or participants based on their features alone.
-
-
-## Exercise
-
-Data Inspection
-
-- Load your dataset using `pd.read_csv()`.  
-- Display:  
-   - `.head()`  
-   - `.info()`  
-   - `.describe()`  
-- Identify which variables are:  
-   - Numerical  
-   - Categorical  
-   - Binary labels  
+By training on labeled data (features + labels), the model can learn to classify new trials or participants based on their features alone.
 
 
-preprocessing
+## TODO
 
-1. Convert categorical variables using:  
-   - `pd.get_dummies()` OR `sklearn.preprocessing.OneHotEncoder`
-2. Drop/investigate missing data  
-3. Convert boolean labels (e.g., `is_correct`) into {0, 1}  
-4. Visualize distributions of key variables  
+Choose a prediction task:
+- Predict "high stress vs low stress"
+- Predict "introvert vs extrovert"
+- Predict "responded correctly vs incorrectly under high load"
 
-
-Feature extraction
-
-Create at least 3 new features, such as:
-
-- RT_z = (RT − mean) / std  
-- Average Likert score  
-- Condition difficulty coding (easy=0, hard=1)  
-- Response variability per participant  
-
-Train a Classifier
-
-from sklearn.linear_model import LogisticRegression
-Define X (features) and y (labels)
-Split into train/test
-Train the model
-Compute accuracy
-Print model coefficients
-
-
-Train a DecisionTreeClassifier
-Plot the tree structure using sklearn.tree.plot_tree
-Identify: The most informative features
-
-- cross validation: from sklearn.model_selection import cross_val_score
-
-Compute 5-fold cross-validation accuracy for any model.
-Report mean, min, max accuracy.
-
-
-evaluate
-
-Compute:
-confusion matrix
-precision
-recall
-F1
-
-from sklearn.metrics import confusion_matrix, classification_report
-
-
-ROC Curve
-from sklearn.metrics import RocCurveDisplay
-
-Plot the ROC curve.
-Compute AUC.
-
-
-Compare two models
-Compare Two Models
-
-Compare Logistic Regression vs Random Forest:
-Accuracy
-ROC AUC
-Confusion matrix
-Which performs better and why?
-
-
-Example task:
-
-Predict “high stress vs low stress”
-Predict “introvert vs extrovert”
-Predict “responded correctly vs incorrectly under high load”
+### Define X and y
 X = questionnaire responses
 y = participant category
 
-Run at least 2 classifiers.
+### Data inspection
+
+- Load your dataset using `pd.read_csv()`
+- Display `.head()`, `.info()`, `.describe()`
+- Identify which variables are: Numerical, Categorical, Binary labels
 
 
+### Preprocessing
 
-# HPO
-from sklearn.model_selection import GridSearchCV
-
-dimentionality reduction
-from sklearn.decomposition import PCA
-
-
-unbalanced data
-Apply:
-class weights
-SMOTE oversampling
-ROC-AUC evaluation
+1. Convert categorical variables using:  
+   - `pd.get_dummies()` OR `sklearn.preprocessing.OneHotEncoder`
+2. Drop/investigate missing data
+3. Convert boolean labels (e.g., `is_correct`) into {0, 1}
+4. Use seaborn or pandas to visualize distributions of key variables  
 
 
-Aggregate trial-level features into participant-level features.
+### Feature extraction
 
-Example:
-Mean accuracy per condition
-RT variability
-Questionnaire subscale scores
-Train model to classify participants instead of trials.
+Create at least 3 new features, such as:
+
+- `rt_z = (rt − mean) / std`  
+- Log-transform RTs: `log_rt = np.log(rt)`
+- Average Likert score
+- Condition difficulty coding (easy=0, hard=1)
+- Response variability per participant
+
+### Train a logistic regression
+
+- `from sklearn.linear_model import LogisticRegression`
+- Define X (features) and y (labels)
+- Split X and y into train/test
+- Train the model using X_train, y_train
+- Compute accuracy on X_test, y_test
+- Print model coefficients
 
 
-XAI
+### Train a DecisionTreeClassifier
 
-SHAP values
-Permutation importance
-Partial dependence plots
+- Plot the tree structure using `sklearn.tree.plot_tree`
+- Identify the most informative features
 
-Which cognitive features drive the classification?
+
+### Model evaluation
+- cross validation: `from sklearn.model_selection import cross_val_score`
+- Compute 5-fold cross-validation accuracy.
+- Report mean, min, max accuracy.
+- Compute confusion matrix, precision, recall, F1. Use `from sklearn.metrics import confusion_matrix, classification_report`
+
+
+- ROC Curve: `from sklearn.metrics import RocCurveDisplay`
+- Plot the ROC curve and compute AUC.
+
+### Model comparison
+
+- Compare Logistic Regression vs Random Forest: Accuracy, ROC AUC, Confusion matrix. Which performs better and why?
+
+
+### Hyperparameter tuning
+
+- Compare different SVM kernels: linear, rbf, poly: `from sklearn.model_selection import GridSearchCV`
+
+
+### Improve the model
+
+- Use dimensionality reduction: `from sklearn.decomposition import PCA`
+- Apply class imbalance techniques if needed: class weights, SMOTE oversampling, ROC-AUC evaluation
+- Feature engineering: aggregate trial-level features into participant-level features. Examples:
+   - Mean accuracy per condition
+   - RT variability
+   - Questionnaire subscale scores
+- Train model to classify participants instead of trials.
+
+
+### Explainable AI
+
+- Permutation importance
+- SHAP values
+- Partial dependence plots
+- Which cognitive features drive the classification?

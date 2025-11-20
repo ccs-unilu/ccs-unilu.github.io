@@ -1,9 +1,11 @@
 ---
-title: <i class="bi bi-patch-question"></i> Drift–Diffusion Model
+title: <i class="bi bi-patch-question"></i> Project
+subtitle: Drift–Diffusion Model of Decision Making
 order: 3
+sidebar: main
 ---
 
-## Problem
+## Context
 
 Many cognitive experiments present participants with simple choices (left or right, yes or no, same or different). These decisions produce two key behavioral measures:
 
