@@ -56,6 +56,7 @@ print("Hello, World!")
 ```
 
 ```{python}
+#| code-line-numbers: "1|2"
 from math import sin, pi
 sin(pi / 2)
 ```
@@ -63,6 +64,7 @@ sin(pi / 2)
 ## Integer division
 
 ```{python}
+#| code-line-numbers: "1|2|3"
 print(5/2)   # float division
 print(5//2)  # floor division
 print(5 % 2) # remainder
@@ -78,13 +80,14 @@ Write your answer in a code cell.
 ## Variables
 
 ```{python}
+#| code-line-numbers: "1,2|3|4|5|7,8"
 weight = 55
 height = 1.65
 b = weight
 b *= 2
 b /= height ** 2
-text_left, text_right = "Bel", "Val"
 
+text_left, text_right = "Bel", "Val"
 print(f"Hello, {text_left}{text_right}!")
 ```
 
@@ -112,6 +115,7 @@ next_difficulty = temp
 
 
 ```{python}
+#| code-line-numbers: "1|2|3|4"
 x = 42            # int
 pi = 3.14         # float
 is_valid = True   # bool
@@ -121,34 +125,42 @@ type(is_valid)
 ## Lists
 
 ```{python}
+#| code-line-numbers: "1|2"
 numbers = [1, 4, 9]
 mixed = [1, "a", [10, 20]]
 ```
 
 ```{python}
+#| code-line-numbers: "1|2|3|4"
 len(numbers)
 numbers[0]
 numbers[-1]             # last element
 numbers[0:2]            # slice
+numbers[1:10:2]         # ... with step
 ```
 
+## TODO
+
+- What does `numbers[::-1]` do?
+
+
+## List methods
 ```{python}
+numbers = [1, 4, 9]
 numbers.append(16)
 numbers.extend([25, 36])
 numbers.insert(1, 2)
 ```
 
-
 ## TODO
 
 - Rune append, extend, and insert on the `numbers` list above and observe the changes.
-- What does `numbers[::-1]` do?
 - What does happen wen we run `numbers = numbers.append(16)`?
 
 
 ## Texts
 
-```{python}
+```{.python code-line-numbers="1|2|4,5,6"}
 msg1 = 'Hello, World!'
 msg2 = "Hello, World!"
 
@@ -157,6 +169,8 @@ a multiline
 string."""
 ```
 
+You can also explicitly declare the type:
+
 ```{python}
 msg: str = "Hello, World!"
 ```
@@ -164,6 +178,7 @@ msg: str = "Hello, World!"
 ## Formatted string
 
 ```{python}
+#| code-line-numbers: "2"
 name = "Cognitive Science"
 msg = f"Hello, {name}!"
 print(msg)
@@ -180,15 +195,16 @@ template = t"Hello {name}"
 ## String operations
 
 ```{python}
-len("Cognition")
-list("brain")
-int("42")
-float("3.14")
+len("Cognition")        # length of string
+list("brain")           # turn into list of characters
+int("42")               # convert to integer
+float("3.14")           # convert to number
 ```
 
 ## Or methods
 
 ```{python}
+#| code-line-numbers: "1|2|3|4"
 name.upper()
 "   spaced   ".strip()
 "cog sci".split(" ")
@@ -196,17 +212,29 @@ name.upper()
 ```
 
 
-## Escape sequence and raw string
+## Escaping and raw string
 
-```python
-print("Line1\nLine2\tTabbed")
+```{python}
+#| code-line-numbers: "1|2"
 r"C:\folder\new_file.txt"
+print("Line1\nLine2\tTabbed")
 ```
 
 ## TODO
 
 - Turn "computational" into a list of characters.
 - Reverse the string "neuroscience" using slicing.
+
+
+## Dictionaries
+
+```{python}
+#| code-line-numbers: "1|2|3"
+person = {"name": "Alice", "age": 30, "is_student": False}
+person["name"]
+person["age"] = 31
+person["height"] = 1.70
+```
 
 
 ## Built-in functions
@@ -220,10 +248,10 @@ print("Done!")
 
 ## TODO
 
-- Using weight and height, compute BMI with: $BMI = \fract{weight}{height^2}$
+- Using weight and height, compute BMI with: $BMI = \frac{weight}{(height)^2}$
 - Create a form in Colab to auto-report BMI. Use `# @param {"type":"number"}` for weight and height.
 
-## Built-in functions
+## Getting help
 
 ```{python}
 # This is a comment
@@ -584,7 +612,7 @@ sum(range(10_000_000))
 
 ## Version control
 
-- Save this notebook to Google Drive
+- Save a new version of your notebook to Google Drive
 - Access your Google Drive from Colab
 
 
@@ -592,3 +620,5 @@ sum(range(10_000_000))
 from google.colab import drive
 drive.mount('/content/drive')
 ```
+
+- Save a csv file to your Drive
