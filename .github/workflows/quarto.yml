@@ -18,6 +18,11 @@ jobs:
     permissions:
       contents: write
     steps:
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: pip install jupyter
       - uses: actions/checkout@v4
       - name: 🛠️ Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2

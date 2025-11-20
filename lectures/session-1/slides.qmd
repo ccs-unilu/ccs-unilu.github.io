@@ -10,6 +10,22 @@ Welcome to the Essential Python lecture for Computational Cognitive Sciences!
 
 We will cover the basics of Python programming that are essential for data analysis and modeling in cognitive sciences.
 
+## Logistics
+
+- Course website (slides, etc): [link]
+- Discussions: [link]
+
+## schedule
+
+- S1 Essential Python (this session)
+- S2 MSA 3.390
+- S3 
+- S4
+- S5
+- S6
+- S7 
+- S8 Project presentations
+
 
 ## Python as Calculator
 
