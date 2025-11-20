@@ -5,6 +5,7 @@ website:
   title: "Computational Cognitive Sciences Course - University of Luxembourg"
 
   sidebar:
+    title: "Computational Cognitive Sciences Course"
     align: center
     style: docked
     search: true
@@ -15,7 +16,7 @@ website:
         href: index.qmd
       - "---"
       - section: "Lectures"
-        contents: "lectures/**/*.qmd"
+        contents: "lectures/**/index.qmd"
       - "---"
       - section: "Resources"
         contents:

@@ -1,5 +1,5 @@
 ---
-title: <i class="bi bi-journals"></i> Essential Python
+title: <i class="bi bi-journals"></i> Session 1
 order: 1
 output-file: index
 subtitle: Essential Python for Computational Cognitive Sciences
@@ -9,13 +9,15 @@ published-title: "Date"
 ---
 
 
+[Slides](slides.qmd)
+
 :::{.callout-tip appearance="simple"}
 
 ## Research Problems
 In this session, we will use Python to address real research questions from cognitive sciences. Please have a look at the following pages for some suggestions:
 
-- [DDM](3-ddm.qmd)
-- [CLS](2-cls.qmd)
+- [DDM](ddm.qmd)
+- [CLS](cls.qmd)
 :::
 
 ## Why Python?

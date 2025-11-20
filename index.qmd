@@ -1,6 +1,8 @@
 ---
-title: "CompCogSci Course"
+title: "Welcome!"
 page-layout: full
 ---
 
-Welcome to the Computational Cognitive Sciences course at the University of Luxembourg.
+Welcome to the **Computational Cognitive Sciences** course at the University of Luxembourg.
+
+Here, you'll find course materials, lecture slides, assignments, and additional resources to support your learning journey.

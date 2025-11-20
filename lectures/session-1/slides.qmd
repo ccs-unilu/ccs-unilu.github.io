@@ -1,36 +1,63 @@
 ---
-title: "Essential Python"
+title: "Python for CompCogSci"
+date: 2026-11-21
+date-format: "MMMM YYYY"
 format: revealjs
 execute:
     echo: true
 number-sections: false
 ---
 
-Welcome to the Essential Python lecture for Computational Cognitive Sciences!
+## Welcome!
 
-We will cover the basics of Python programming that are essential for data analysis and modeling in cognitive sciences.
+## Info
 
-## Logistics
+- 8 sessions, the last two for project presentations
+- 3 ECTS for PhD students
+- **Materials**: [ccs-unilu.github.io](https://ccs-unilu.github.io)
+- **Discussions**: Moodle or [github.com/ccs-unilu](https://github.com/ccs-unilu/)
 
-- Course website (slides, etc): [link]
-- Discussions: [link]
+## Why Python?
 
-## schedule
+We are going to use Python for this course because it is:
 
-- S1 Essential Python (this session)
-- S2 MSA 3.390
-- S3 
-- S4
-- S5
-- S6
-- S7 
-- S8 Project presentations
+- free and open-source
+- cross-platform
+- easy to read syntax
+- widely used, well-supported, well-documented
+- enormous standard library and third-party libraries (many academic libs)
+- options to increase speed
 
+:::{.notes}
+Expand each
+:::
+
+## `https://colab.google`
+
+![](./figures/colab-empty.png)
+
+
+## TODO
+
+Black Screen Syndrome!
+
+- Create a new Google Colab notebook and save it as 'ccs-unilu-session1'.
+- Add a new markdown cell with your name.
+- Add a new code cell that prints `Hello, World!`.
+
+```python
+print("Hello, World!")
+```
 
 ## Python as Calculator
 
 ```{python}
 2 + 3 * 5
+```
+
+```{python}
+from math import sin, pi
+sin(pi / 2)
 ```
 
 ## Integer division
@@ -41,10 +68,10 @@ print(5//2)  # floor division
 print(5 % 2) # remainder
 ```
 
-## Exercise
+## TODO
 
-- How many milliseconds are in 7.5 hours?
-- What is the remainder when 987 is divided by 23?
+- Our study took 7.5 hours. How many milliseconds?
+- A HIT on Amazon MTurk pays $0.75 for 15 minutes. How much should they pay for a task that takes 53 minutes?
 
 Write your answer in a code cell.
 
@@ -56,58 +83,101 @@ height = 1.65
 b = weight
 b *= 2
 b /= height ** 2
-x, y = "Bel", "Val"
+text_left, text_right = "Bel", "Val"
 
-print(f"Hello, {x}{y}!")
+print(f"Hello, {text_left}{text_right}!")
 ```
 
-## Exercise
+## TODO
 
 - Run `%whos` in a code cell to see the list of defined variables.
+
 - What does the following code do?
 ```{python}
-x = 10
-y = 20
-temp = x
-x = y
-y = temp
+current_difficulty = 10
+next_difficulty = 20
+temp = current_difficulty
+current_difficulty = next_difficulty
+next_difficulty = temp
 ```
 
-- Swap the contents of x and y using multiple assignment, not a temporary variable.
-
+- Interchange the contents of x and y using multiple assignment without temp variable, so x is y and y is x.
 
 ## Basic Data Types
 
-- string
-- integer
-- float
-- boolean (True/False)
+- text (`str`) 
+- numbers (`int`, `float`)
+- True/False (`bool`)
+- collections (`list`, `tuple`, `dict`, `set`)
 
-## String
 
 ```{python}
-s1 = 'Hello, World!'
-s2 = "Hello, World!"
-s3 = """This is
+x = 42            # int
+pi = 3.14         # float
+is_valid = True   # bool
+type(is_valid)
+```
+
+## Lists
+
+```{python}
+numbers = [1, 4, 9]
+mixed = [1, "a", [10, 20]]
+```
+
+```{python}
+len(numbers)
+numbers[0]
+numbers[-1]             # last element
+numbers[0:2]            # slice
+```
+
+```{python}
+numbers.append(16)
+numbers.extend([25, 36])
+numbers.insert(1, 2)
+```
+
+
+## TODO
+
+- Rune append, extend, and insert on the `numbers` list above and observe the changes.
+- What does `numbers[::-1]` do?
+- What does happen wen we run `numbers = numbers.append(16)`?
+
+
+## Texts
+
+```{python}
+msg1 = 'Hello, World!'
+msg2 = "Hello, World!"
+
+msg3 = """This is
 a multiline
 string."""
 ```
 
-## Formatted String
+```{python}
+msg: str = "Hello, World!"
+```
+
+## Formatted string
 
 ```{python}
 name = "Cognitive Science"
-s4 = f"Hello, {name}!"
-print(s4)
+msg = f"Hello, {name}!"
+print(msg)
 ```
 
-## Template Strings (Python 3.14+)
-```{python}
-from string import Template
-t = Template("Hello, $name!")
-s5 = t.substitute(name="Cognition")
-print(s5)
+## Template strings (3.14+)
+
+Every October we get a new Python version!
+
+```python
+template = t"Hello {name}"
 ```
+
+## String operations
 
 ```{python}
 len("Cognition")
@@ -116,41 +186,42 @@ int("42")
 float("3.14")
 ```
 
-## or string methods
+## Or methods
 
 ```{python}
-"hello".upper()
+name.upper()
 "   spaced   ".strip()
-"cog sci".split()
+"cog sci".split(" ")
 "-".join(["a", "b", "c"])
 ```
 
 
 ## Escape sequence and raw string
 
-```
+```python
 print("Line1\nLine2\tTabbed")
 r"C:\folder\new_file.txt"
 ```
 
-## Exercise
+## TODO
 
 - Turn "computational" into a list of characters.
 - Reverse the string "neuroscience" using slicing.
 
 
-## Built-in Functions
+## Built-in functions
 
 ```{python}
 type(height)
 round(3.14159, 2)
+list(range(5))
 print("Done!")
 ```
 
-## Exercise
+## TODO
 
-- Using weight and height, compute BMI with: $BMI = weight \over height^2$
-
+- Using weight and height, compute BMI with: $BMI = \fract{weight}{height^2}$
+- Create a form in Colab to auto-report BMI. Use `# @param {"type":"number"}` for weight and height.
 
 ## Built-in functions
 
@@ -165,32 +236,15 @@ dir(str)
 ```{python}
 #| error: true
 # this causes an error
-5 + "a"
+b = 5
+a = "2"
+
+a + b
 ```
 
-## List
+## TODO
 
-```{python}
-numbers = [1, 4, 9]
-mixed = [1, "a", [10, 20]]
-```
-
-```{python}
-len(numbers)
-numbers[0]
-numbers[-1]
-numbers[0:2]
-
-numbers.append(16)
-numbers.extend([25, 36])
-numbers.insert(1, 2)
-```
-
-
-## Exercise
-
-- Create a list of participant IDs: ['P1', 'P2', ..., 'P10'] using a loop or list comprehension.
-
+- Use type casting to fix the error.
 
 ## Modules
 
@@ -203,7 +257,7 @@ print(time.ctime())
 ```
 
 
-## Exercise
+## TODO
 
 - `import this` and read the Zen of Python. What are your favorite principles?
 
@@ -217,6 +271,8 @@ for item in ["a", "b", "c"]:
 for i, item in enumerate(["a", "b", "c"]):
     print(i, item)
 ```
+
+- Create a list of participant IDs: ['P1', 'P2', ..., 'P10'] using a loop or list comprehension and list.append
 
 ## While loop
 
@@ -240,24 +296,31 @@ else:
 ```
 
 
-## match-case (Python 3.10+)
+## Match-case (Python 3.10+)
 
 ```{python}
-status = 200
-match status:
-    case 200:
-        print("OK")
-    case 404:
-        print("Not found")
+response_code = "left"
+
+match response_code:
+    case "left":
+        print("Response is correct")
+    case "right":
+        print("Response is incorrect")
+    case _:
+        print("Unknown response")
 ```
 
-## list comprehension
+## List comprehension
 
 ```{python}
 [x**2 for x in range(5)]
 ```
 
-## Exercise
+```{python}
+[x**2 for x in range(10) if x > 5]
+```
+
+## TODO
 
 - Use a list comprehension to extract all even numbers from range(1, 50).
 
@@ -266,13 +329,12 @@ match status:
 
 ## Upload files to Colab
 
-```
+```python
 from google.colab import files
 uploaded = files.upload()
 ```
 
-
-## read a file
+## Read a file
 
 ```python
 f = open('example.txt', 'r')
@@ -280,23 +342,12 @@ contents = f.read()
 f.close()
 ```
 
-## or safer using 'with':
+## Or do it safely using 'with':
 
 ```python
 with open('example.txt', 'r') as f:
     contents = f.read()
 ```
-
-## matching file names
-
-```python
-import glob
-glob.glob("*.txt")
-```
-
-## Exercise
-
-- Find all `.csv` files in the current directory using `glob`.
 
 
 ## Pandas
@@ -324,11 +375,11 @@ sns.scatterplot(data=df, x="col1", y="col2")
 ```
 
 
-## Exercise
+## TODO
 
 Load a CSV file and:
 
-- Show the first 5 rows.
+- Show the first 5 rows using df.head().
 - Plot a histogram of one numeric column.
 - Compute the mean of any numeric variable.
 
@@ -345,16 +396,14 @@ arr_2d[0,1]
 arr_2d[:,1]
 ```
 
-
-## stats
+## basic stats
 
 ```python
 np.mean(arr)
 np.mean(arr_2d, axis=0)
 ```
 
-
-## generate random numbers
+## Generate random numbers
 
 ```python
 np.random.seed(42)
@@ -362,14 +411,14 @@ np.random.normal(loc=0, scale=1, size=5)
 np.random.choice([0,1], size=10)
 ```
 
-## Exercise
+## TODO
 
 - Simulate 100 response times from a normal distribution (mean=500 ms, SD=80 ms) and compute: mean, min, max, and standard deviation.
-- remove invalid RTs (< 0 ms)
-- Now simulate 100 response times from a lognormal distribution (mean=6, sigma=0.2). Compute the same statistics.
+- Remove invalid RTs (< 0 ms)
+- Simulate 100 response times from a lognormal distribution (mean=6, sigma=0.2). Compute the same statistics.
 
 
-## functions
+## Functions
 
 ```python
 def bmi(weight, height=1.90):
@@ -379,8 +428,12 @@ def bmi(weight, height=1.90):
 bmi(60, 1.65)
 ```
 
+## TODO
 
-## scope
+- Write a function `zscore(x, mean, std)` that returns the z-score.
+
+
+## Scope
 
 ```{python}
 x = "global"
@@ -402,11 +455,7 @@ print("x=", x)
 ```
 
 
-## Exercise
-
-- Write a function `zscore(x, mean, std)` that returns the z-score.
-
-## error handling
+## Error handling
 
 ```python
 try:
@@ -418,7 +467,7 @@ finally:
 ```
 
 
-## assertion
+## Assertion
 
 ```python
 def sqrt(x):
@@ -427,14 +476,15 @@ def sqrt(x):
 ```
 
 
-## standard libraries
+## Standard Library
+
+## math
 
 ```{python}
 import math
 print(math.pi)
 print(math.sqrt(9))
 ```
-
 
 ## os
 
@@ -444,6 +494,11 @@ os.listdir()
 os.getcwd()
 ```
 
+## TODO
+
+- Use the `os` module to create a new directory named 'data' in the current working directory.
+- List all files in the current directory using `os.listdir()`.
+
 ## sys
 
 ```{python}
@@ -451,22 +506,33 @@ import sys
 sys.version
 ```
 
+## TODO
 
-## magic commands (Jupyter specific)
+- What is the version of Python you are using?
+- Use sys.version_info.minor to check if you can run this code:
 
-```{python}
-%lsmagic
+```python
+type Point = tuple[int, int]
+p: Point = (3, 4)
 ```
 
-## time execution
+## glob
 
-```{python}
-%%time
-sum(range(10_000_000))
+To match file names
+
+```python
+import glob
+glob.glob("*.txt")
 ```
 
+## TODO
 
-# regular expressions
+- Find all `.csv` files in a directory using `glob`.
+- Does it find files in subdirectories?
+- Load all the csv files into a single Pandas DataFrame.
+
+
+## Regular expressions
 
 ```{python}
 import re
@@ -474,10 +540,49 @@ re.findall(r"\d+", "RT=532ms, ACC=1")
 ```
 
 
-## Exercise
+## TODO
+
 - Extract all floating-point numbers from: `RT=512.3 ms, RT=489.1 ms, RT=501.7 ms` using regex.
 
-## Version Control
+:::{.callout-tip collapse="true" title="Solution" appearance="simple"}
+```{python}
+import re
+text = "RT=512.3 ms, RT=489.1 ms, RT=501.7 ms"
+response_times = re.findall(r"RT=(\d+\.\d+) ms", text)
+response_times = [float(rt) for rt in response_times]
+print(response_times)
+```
+:::
+
+## Magic commands
+
+Only on Colab/Jupyter
+
+```{python}
+%lsmagic
+```
+
+## TODO
+
+- What does `%pip` do? Use `?` or `??` to find out.
+
+## Install packages
+
+```python
+!pip install PyDDM
+!pip install pymc
+```
+
+
+## How long does it take?
+
+```{python}
+%%time
+sum(range(10_000_000))
+```
+
+
+## Version control
 
 - Save this notebook to Google Drive
 - Access your Google Drive from Colab

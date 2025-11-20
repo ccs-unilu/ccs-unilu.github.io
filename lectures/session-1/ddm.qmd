@@ -1,6 +1,44 @@
+---
+title: <i class="bi bi-patch-question"></i> Drift–Diffusion Model
+order: 3
+---
+
+## Problem
+
+Many cognitive experiments present participants with simple choices (left or right, yes or no, same or different). These decisions produce two key behavioral measures:
+
+- Accuracy (correct / incorrect)
+- Response time (how long it took to respond)
+
+However, raw behavioral data alone cannot explain why decisions were fast, slow, easy, or difficult. We need an explanatory model that links latent cognitive processes to the behavior we observe.
+
+The Drift–Diffusion Model (DDM) describes decision making as a process of accumulating noisy evidence over time until a boundary is reached (to make a choice). The DDM has several key parameters that capture different aspects of the decision process:
+
+![](https://www.researchgate.net/publication/261998604/figure/fig1/AS:11431281247561069@1716880692181/Examples-of-trajectories-of-the-drift-diffusion-model-Two-decision-boundaries-0-and-a.tif)
 
 
-## Exercise:
+- Drift rate: how quickly evidence accumulates (task difficulty, stimulus strength)
+- Boundary separation: response caution or speed–accuracy tradeoff
+- Noise: trial-to-trial variability
+- Non-decision time: perceptual + motor delay
+
+By simulating this dynamic process, the DDM can recreate the patterns seen in real behavior:
+
+- Distributions of fast vs. slow, correct vs. error
+- Accuracy differences across conditions
+- Individual differences in decision strategies
+
+## Data
+
+- We will be using the example "nback_data.csv" dataset for this session.
+- The data consists of the following columns:
+    - subject_id: unique identifier for each participant
+    - condition: experimental condition (e.g., easy for 2-back, hard for 3-back)
+    - response_time: response time in seconds
+    - correct: 1 for correct, 0 for incorrect
+
+
+## TODO
 
 
 ### Load and clean the data
@@ -105,3 +143,26 @@ Grid search:
 - Try drift values between 0.1 and 2.0 and find the one that best matches empirical accuracy.
 - Find which boundary value makes simulated RT median most similar to observed RT median.
 - Plot several random drift–diffusion paths for intuition.
+
+
+
+## PyDDM
+
+First install PyDDM if you haven't already, and then run this code to create an interactive DDM explorer:
+
+```python
+import pyddm
+import pyddm.plot
+import numpy as np
+model = pyddm.gddm(drift=lambda x,leak,driftrate : driftrate - x*leak,
+                   noise=1,
+                   bound=lambda t,initial_B,collapse_rate : initial_B * np.exp(-collapse_rate*t),
+                   starting_position="x0",
+                   parameters={"leak": (0, 2),
+                               "driftrate": (-3, 3),
+                               "initial_B": (.5, 1.5),
+                               "collapse_rate": (0, 10),
+                               "x0": (-.9, .9)})
+            
+pyddm.plot.model_gui_jupyter(model)
+```
