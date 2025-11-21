@@ -39,14 +39,15 @@ On each trial, participants saw a noisy patch tilted slightly left/right and had
 - easy: clear stimulus
 - hard: noisy stimulus
 
-The dataset is stored in the `2afc_clean.csv` file. Each row represents a single trial and contains:
+The dataset is stored in the `2afc_trials.csv` file. Each row represents a single trial and contains:
 - `agent_id`: unique identifier for each participant
 - `trial_index`: incremental trial order for that participant
 - `stimulus_description`: experimental condition ("easy" or "hard")
+- `response_description`: participant's response ("left" or "right")
 - `response_time`: time taken to respond (in seconds)
 - `accuracy`: 1 = correct, 0 = incorrect
 
-You can also find metadata about the experiment in `2afc_clean.yaml` in [CSVW format](https://csvw.org).
+You can also find metadata about the experiment in `2afc_trials.yaml` in [CSVW format](https://csvw.org).
 
 ## TODO
 
