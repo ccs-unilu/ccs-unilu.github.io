@@ -3,7 +3,9 @@ title: "Python for CompCogSci"
 date: 2025-11-21
 date-format: "MMMM DD, YYYY"
 published-title: "Date"
-format: revealjs
+format:
+    revealjs:
+        incremental: true
 execute:
     echo: true
 number-sections: false
@@ -29,6 +31,7 @@ We are going to use Python for this course because it is:
 - widely used, well-supported, well-documented
 - enormous standard library and third-party libraries (many academic libs)
 - options to increase speed
+
 
 :::{.notes}
 Expand each
