@@ -11,6 +11,7 @@ published-title: "Date"
 ### Course Materials
 
 - [Slides](slides.qmd)
+- [Polls](https://PollEv.com/mortyn053)
 
 ### Example Projects
 In this session, we will use Python to address real research questions from cognitive sciences. Please have a look at the following pages for some suggestions:
