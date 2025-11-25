@@ -4,12 +4,12 @@ subtitle: Learn more about different topics in computational cognitive sciences
 abstract-title: ""
 ---
 
-## Programming with Python
+## Python
 
 Here are some useful resources to learn more about programming with Python:
 
-- [Python: The Documentary](https://www.youtube.com/watch?v=GfH4QL4VqJ0)
-- [AI-Assisted Programming (Russell Poldrack)](https://neurohackademy.org/course/ai-assisted-programming-2/)
+- <i class="bi bi-youtube"></i> [The Story of Python and how it took over the world | Python: The Documentary](https://www.youtube.com/watch?v=GfH4QL4VqJ0)
+- <i class="bi bi-youtube"></i> [AI-Assisted Programming (Russell Poldrack)](https://neurohackademy.org/course/ai-assisted-programming-2/)
 
 
 ## Dimensionality Reduction
