@@ -19,7 +19,7 @@ However, raw behavioral data alone cannot explain why decisions were fast, slow,
 
 The Drift–Diffusion Model (DDM) describes decision making as a process of accumulating noisy evidence over time until a boundary is reached (to make a choice). The DDM has several key parameters that capture different aspects of the decision process:
 
-![](./figures/ddm.jpg){fig-align="center" width="75%"}
+![](../figures/ddm.jpg){fig-align="center" width="75%"}
 
 
 - **v**: drift rate (speed and quality of evidence, task difficulty, stimulus strength)
