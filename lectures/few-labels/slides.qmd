@@ -1,0 +1,705 @@
+---
+title: "Learning with Fewer Labeled Examples"
+author: Computational Cognitive Sciences, University of Luxembourg
+date: "May 2026"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    chalkboard: true
+    preview-links: auto
+    code-line-numbers: true
+    transition: fade
+    background-transition: fade
+    incremental: false
+---
+
+# Welcome {.center}
+
+10:00 - 17:00, three slots with two breaks for lunch and coffee.
+
+---
+
+##
+
+By 17:00 you will have:
+
+- trained a deep model on real EEG,
+- watched it fail in two different ways,
+- and learned seven strategies for keeping it from failing again.
+
+---
+
+##
+
+A two-year-old learns to recognize a cat from about eight examples.
+
+A standard deep network needs about eight million.
+
+---
+
+## What this lecture is really about
+
+The branch of deep learning that has been quietly trying, for the last decade, to close that gap.
+
+The textbook name for this branch is **learning with fewer labeled examples** — the title and topic of Chapter 19 of the PML book (Murphy 2022).
+
+Today is that chapter, in code, on brain data, reorganized around what resource each strategy exploits.
+
+---
+
+## The problem
+
+You have a model with a million parameters.
+
+You have 30 labeled examples.
+
+What do you do?
+
+::: {.fragment}
+The PML book answers this in seven different ways.
+:::
+
+---
+
+## The strategies, by resource
+
+::: {.list-table}
+- - Resource
+  - Strategy
+  - PML
+  - Notebook
+
+- - Your own data
+  - Augmentation
+  - 19.1
+  - single
+
+- - Your own data
+  - Better features (Riemannian)
+  - —
+  - single
+
+- - Your own data
+  - Semi-supervised (pseudo-labels)
+  - 19.3
+  - single
+
+- - Your own data
+  - Weakly supervised (smoothing)
+  - 19.7
+  - single
+
+- - Other people's data
+  - Transfer learning
+  - 19.2
+  - transfer
+
+- - Other people's data
+  - Few-shot calibration
+  - 19.6
+  - transfer
+
+- - Smarter strategy
+  - Active learning
+  - 19.4
+  - active
+
+- - Smarter strategy
+  - Meta-learning (MAML)
+  - 19.5
+  - active
+:::
+
+---
+
+## How the day is shaped
+
+::: {.list-table}
+- - Time
+  - Notebook
+  - Theme
+
+- - 10:00 - 12:00
+  - `01_single.ipynb`
+  - Working with what you have
+
+- - 12:00 - 13:00
+  - Break
+  - -
+
+- - 13:00 - 15:00
+  - `02_transfer.ipynb`
+  - Help from other datasets and tasks
+
+- - 15:00 - 15:30
+  - Break
+  - -
+
+- - 15:30 - 17:00
+  - `03_active.ipynb`
+  - Asking smarter questions
+:::
+
+---
+
+## How to follow today
+
+**The notebook is the lecture.** You run it, read it, and do the exercises in it.
+
+**These slides are a map.** Each module here gives you four things and nothing else:
+
+- the **goal** — why the notebook exists,
+- **how to open** it and what to install,
+- a **roadmap** pointing to its sections,
+- the **formulas and concepts** too dense for a code comment, plus a **wrap**.
+
+When a slide and the notebook overlap, trust the notebook.
+
+---
+
+## Tools we will use
+
+- **Google Colab** (or local Jupyter) for the notebooks
+- **MNE-Python** + **MOABB** for EEG and the dataset
+- **scikit-learn** for the simple models
+- **Braindecode** for EEGNet
+- **pyriemann** for a strong classic baseline
+- **learn2learn** for the MAML demo
+- **seaborn** for plotting outcomes
+
+This is a course in computational cognitive sciences, not a deep learning course. We will not derive backpropagation. We will sometimes wave hands.
+
+---
+
+# Working with What You Have {.center background-color="#1a1a1a"}
+
+## 10:00 - 12:00 · `01_single.ipynb`
+
+PML 19.1, 19.3, 19.7
+
+---
+
+## Goal
+
+Take **one subject's** EEG and ask: how much can we squeeze out of it?
+
+Train a classifier, watch it fail when labels are scarce, then apply four fixes that all stay **inside the same dataset** — no transfer, no pretraining (that comes after lunch).
+
+---
+
+## Open the notebook
+
+`01_single.ipynb` — Colab badge at the top, or `github.com/ccs-unilu/few2026`.
+
+- Runtime → Change runtime type → **T4 GPU** (needed for §7).
+- Run the install cell once: `moabb`, `braindecode`, `pyriemann`, `seaborn`.
+- First data download is ~500 MB / ~5 min, then cached.
+
+**Open it now** and let the download run while we talk.
+
+---
+
+## What you need to know: the signal
+
+Imagine clenching your left fist. Without moving. Now your right.
+
+A small, reliable change happens in your sensorimotor cortex: the alpha (8–13 Hz) and beta (13–30 Hz) rhythms over the **contralateral** hemisphere weaken. This is **event-related desynchronization** (ERD).
+
+If we can measure ERD, we can decode which hand you imagined.
+
+---
+
+## What you need to know: the dataset
+
+**PhysioNet Motor Imagery** (Schalk et al. 2004).
+
+- 109 subjects, 64-channel EEG, 160 Hz.
+- Each trial: imagined movement of the left or right hand.
+- Standard MOABB benchmark; today 10 subjects to keep downloads polite.
+
+The raw trace looks like noise. The notebook's first move is to extract **log bandpower** per channel and band — 64 × 2 = 128 features.
+
+---
+
+## The roadmap
+
+::: {.list-table}
+- - §
+  - Step
+  - PML
+
+- - 2
+  - Baseline classifier (all labels)
+  - —
+
+- - 3
+  - Failure: not enough labels
+  - —
+
+- - 4
+  - Fix 1 — Riemannian features
+  - —
+
+- - 5
+  - Fix 2 — augmentation
+  - 19.1
+
+- - 6
+  - Fix 3 — pseudo-labeling
+  - 19.3
+
+- - 7
+  - Fix 4 — label smoothing
+  - 19.7
+:::
+
+---
+
+## Failure mode 1: not enough labels
+
+Train and test on subject 1, but give the classifier only 5, 10, 20, 40, or 60 trials per class.
+
+The learning curve is monotonic and **steep at the bottom**: with 5 trials per class the model is barely above chance.
+
+This is the **central failure of Ch. 19.** Every fix below is a different way to make the curve climb faster.
+
+---
+
+## Fix 1: Riemannian tangent space
+
+Each trial gives a channel covariance matrix $C_i$. These live on a curved manifold — the cone of symmetric positive-definite matrices, $\mathrm{SPD}(64)$.
+
+Project to a flat tangent space at the geometric mean $\bar C$, then a standard linear classifier can eat them:
+
+$$s_i \;=\; \mathrm{upvec}\!\left(\log\!\big(\bar C^{-1/2}\, C_i\, \bar C^{-1/2}\big)\right)$$
+
+Embarrassingly competitive on motor imagery for over a decade — often beats deep models when labels are very few.
+
+---
+
+## Fix 2: augmentation (PML 19.1)
+
+A trial is one sample from a larger family of acceptable trials. Shift time by 50 ms — still "left hand". Drop an electrode — still "left hand".
+
+Augmentation encodes **invariances** without writing them down. Four one-liners: time shift, channel dropout, Gaussian noise, and **mixup**:
+
+$$\tilde x = \lambda x_i + (1-\lambda)\, x_j, \qquad \lambda \sim \mathrm{Beta}(\alpha,\alpha)$$
+
+Cog-sci analog: a child concluding that a cat under different lighting is still a cat.
+
+---
+
+## Fix 3: pseudo-labeling (PML 19.3)
+
+The unlabeled trials are still there, and their distribution matches the labeled ones. The simplest semi-supervised move:
+
+1. Train on the small labeled set.
+2. Predict on the pool; keep the confident ones, $\max_k p_\theta(k\mid x) \ge \tau$ (here $\tau = 0.85$).
+3. Add them to training. Retrain.
+
+Cog-sci analog: a first literature review — read a few papers closely, skim many, trust your judgment on the easy ones. **If your judgment is good this works; if not, it amplifies your bias.**
+
+---
+
+## Fix 4: label smoothing (PML 19.7)
+
+Real labels are messy — we cannot verify what the subject imagined; clinical EEG interrater agreement caps near 80%.
+
+Standard cross-entropy demands "class 1, 100% certain". Label smoothing softens the target:
+
+$$\tilde y_k = (1-\varepsilon)\,[\,k = y\,] + \frac{\varepsilon}{K}, \qquad \mathcal L = -\sum_k \tilde y_k \log p_\theta(k\mid x)$$
+
+With $K=2,\ \varepsilon=0.1$ the target is $(0.9, 0.1)$ — the model never gets infinite gradient pressure to fit a single label. We corrupt 10–30% of labels and watch it degrade gracefully.
+
+---
+
+## Discussion: within-dataset fixes
+
+- Riemannian features from 2012 are still close to state of the art. What does that say about "deep" vs "geometric" representations for EEG?
+- Mixup blends two trials and their labels. Does that make biological sense for EEG?
+- Pseudo-labeling worked because the unlabeled trials matched the labeled ones. What if the pool came from a different subject?
+
+(Poll on screen.)
+
+---
+
+## Module 1 wrap
+
+- The within-subject few-labels curve is the **diagnosis**; everything else is a fix.
+- Better features (Riemannian) and pseudo-labels are the largest wins on this dataset.
+- Augmentation buys a few points; label smoothing only earns its keep once labels are actually noisy.
+- None of these techniques borrow from anyone else.
+
+**Bridge.** After lunch the classifier still fails — but for a different reason: the wrong person.
+
+---
+
+# Help from Other Datasets and Tasks {.center background-color="#1a1a1a"}
+
+## 13:00 - 15:00 · `02_transfer.ipynb`
+
+PML 19.2, 19.6
+
+---
+
+## Goal
+
+Notebook 1 squeezed one subject. Now look **outward**: other subjects ran the same paradigm, and their data carries usable structure.
+
+Close the cross-subject gap with three fixes that borrow from external data — borrowed features, transfer learning, and few-shot calibration.
+
+---
+
+## Open the notebook
+
+`02_transfer.ipynb` — Colab badge, or `github.com/ccs-unilu/few2026`.
+
+- Same **T4 GPU** runtime; it trains a small EEGNet.
+- Install cell adds `sentence-transformers` and `umap-learn` — only for the optional §7. Drop them if you skip it.
+- It saves a checkpoint to `/content/eegnet_pretrained.pt`; notebook 3 reloads it.
+
+---
+
+## The roadmap
+
+::: {.list-table}
+- - §
+  - Step
+  - PML
+
+- - 2
+  - Failure: not the right person
+  - —
+
+- - 3
+  - Pretrain EEGNet on 9 subjects
+  - —
+
+- - 4
+  - Fix 1 — borrowed (frozen) features
+  - 19.2
+
+- - 5
+  - Fix 2 — transfer learning
+  - 19.2
+
+- - 6
+  - Fix 3 — few-shot calibration
+  - 19.6
+
+- - 7
+  - Optional — the recipe on text
+  - —
+:::
+
+---
+
+## Failure mode 2: not the right person
+
+Same paradigm, different brain. Train on subject 1, test on subject 2, **zero calibration**.
+
+Sweep all 10 subjects in both directions:
+
+- within-subject accuracy: **0.65–0.85**
+- cross-subject accuracy: **near 0.55**
+
+That gap is the second failure of Ch. 19. The whole afternoon is about closing it.
+
+---
+
+## The idea: a pretrained model is a prior
+
+Train a small EEGNet on **9 subjects**. It now knows what good EEG features look like — properties of the human sensorimotor system, not of any one person.
+
+The frozen model is the **prior**. Whatever we put on top — a logistic regression, a fine-tuned final layer — is the **posterior update**.
+
+You will recognize this framing from Bayesian cognitive science.
+
+---
+
+## Fix 1: borrowed features (PML 19.2, frozen)
+
+Run three feature extractors on the target subject, train the *same* logistic regression on each:
+
+::: {.list-table}
+- - Features
+  - Era
+  - Cost
+
+- - Bandpower
+  - 1990s
+  - Trivial
+
+- - Riemannian tangent space
+  - 2010s
+  - Cheap
+
+- - Pretrained EEGNet penultimate
+  - 2020s
+  - One forward pass
+:::
+
+The pretrained penultimate sits above both hand-engineered baselines. **Borrowing pays even when the network never touches the target.**
+
+---
+
+## Fix 2: transfer learning (PML 19.2)
+
+Four conditions on the same target test set decompose "what does pretraining buy you?":
+
+::: {.list-table}
+- - Regime
+  - Pretrain
+  - Fine-tune
+
+- - From scratch
+  - none
+  - target only
+
+- - Zero-shot transfer
+  - 9 source subjects
+  - none
+
+- - Fine-tuned transfer
+  - 9 source subjects
+  - 20 target trials
+
+- - + augmentation
+  - 9 source subjects
+  - 20 target + augmented
+:::
+
+From scratch is barely above chance; zero-shot is only a little better. Fine-tuning bridges them, augmentation adds a bit more. **The fixes stack.**
+
+---
+
+## Fix 3: few-shot calibration (PML 19.6)
+
+The chronic problem of BCI: every new user needs a 20-minute calibration session. Can we shrink it to one minute?
+
+Sweep $N \in \{1, 2, 5, 10, 20, 50\}$ target trials per class, fine-tune the pretrained EEGNet on each, plot the curve.
+
+The shape tells you what "enough calibration" means for *your* application: a research demo lives at the steep part; a wheelchair controller does not.
+
+---
+
+## Cog-sci framing: priors
+
+Lake et al. (2015) made the same argument with humans on Omniglot: people learn from one or a few examples because they bring **strong priors**.
+
+Pretraining on 9 other subjects is that prior. The parameters are borrowed instead of philosophized.
+
+---
+
+## Optional coda: the recipe outside EEG (§7)
+
+A 10-minute detour: "frozen encoder + tiny classifier" is not EEG-specific.
+
+Embed ~40 DSM-5-style sentences with `nomic-embed-text-v1.5` (open-weight, T4-friendly), project to 2D with UMAP, watch four clusters emerge with **no supervision**.
+
+Same recipe, different modality.
+
+---
+
+## Discussion: borrowing
+
+- Why is "pretrained on 9 brains" only modestly above chance for motor imagery, when "pretrained on ImageNet" is often enough for natural images?
+- If you could keep only one — augmentation or transfer — which, and why?
+- Real label noise is often *systematic*. Does any of today's borrowing help with that?
+
+---
+
+## Module 2 wrap
+
+- A frozen pretrained encoder + a simple classifier is the strongest first move in 2026.
+- Geometry-aware features (Riemannian) are still hard to beat on small EEG data.
+- Fine-tuning + augmentation stack.
+- Few-shot calibration turns "20 minutes" into "1 minute" at little accuracy cost.
+- The recipe transfers across modalities — same idea works on text.
+
+**Bridge.** Five strategies covered. The last two target a different question: not what to *borrow*, but what to *ask*.
+
+---
+
+# Asking Smarter Questions {.center background-color="#1a1a1a"}
+
+## 15:30 - 17:00 · `03_active.ipynb`
+
+PML 19.4, 19.5
+
+---
+
+## Goal
+
+Notebooks 1 and 2 worked on the data we had or borrowed. Now change **what we ask** of the data:
+
+- given a fixed labeling budget, choose **which** labels to acquire;
+- given many similar tasks, learn an **algorithm** that adapts quickly to each new one.
+
+---
+
+## Open the notebook
+
+`03_active.ipynb` — Colab badge, or `github.com/ccs-unilu/few2026`.
+
+- Same **T4 GPU** runtime.
+- Install cell adds `learn2learn` for the MAML demo.
+- It reloads `/content/eegnet_pretrained.pt` from notebook 2. If the session was reset, it retrains in 2–3 min — harmless.
+
+---
+
+## The roadmap
+
+::: {.list-table}
+- - §
+  - Step
+  - PML
+
+- - 1
+  - Data + reload pretrained model
+  - —
+
+- - 2
+  - Active learning — random vs uncertainty
+  - 19.4
+
+- - 3
+  - Meta-learning — MAML
+  - 19.5
+:::
+
+---
+
+## Active learning (PML 19.4)
+
+You have an unlabeled pool; each label costs something (in BCI, a calibration trial). Which examples should you label first?
+
+The classical answer is **uncertainty sampling**: train on a small seed, then iteratively pick the example the model is least sure about.
+
+$$x^\star = \arg\max_{x\in\mathcal U}\ \big[\,1 - 2\,\lvert p_\theta(x) - 0.5\rvert\,\big]$$
+
+In general, maximize predictive entropy $H(p) = -\sum_k p_k \log p_k$. Confident examples teach nothing; boundary examples teach a lot.
+
+---
+
+## Cog-sci framing: adaptive psychophysics
+
+Uncertainty sampling is exactly what an adaptive psychophysics protocol does.
+
+**QUEST** (Watson & Pelli, 1983), staircase methods, computerized adaptive testing — all special cases of "choose the next observation to maximize expected information gain". PML 19.4 is the formal version.
+
+A skilled clinical interviewer does the same without naming it: the most informative questions are the ones whose answers you cannot predict.
+
+---
+
+## Meta-learning: MAML (PML 19.5)
+
+Pretraining finds one good initialization. **MAML** (Finn et al., 2017) asks for more — an initialization that adapts in a few gradient steps.
+
+Each task $\tau$ is a subject; episodes split into support and query.
+
+$$\theta'_\tau = \theta - \alpha\,\nabla_\theta\,\mathcal L^{\text{supp}}_\tau(\theta)
+\qquad
+\min_\theta \sum_\tau \mathcal L^{\text{qry}}_\tau(\theta'_\tau)$$
+
+Inner loop adapts; outer loop tunes the initialization so adaptation works. On motor imagery, MAML rarely beats well-tuned pretraining by much — **the mechanism is the point.**
+
+---
+
+## Cog-sci framing: learning sets
+
+"Learning to learn" comes from Harlow's 1949 study of rhesus monkeys.
+
+Monkeys solving many similar discrimination problems got faster at new ones — eventually solving them after a single trial. He called it a **learning set**.
+
+MAML is the modern, gradient-friendly formalization. The hierarchical-Bayes view makes it explicit: what is learned across tasks is a **prior over weights**, which functions as the learning set.
+
+---
+
+## Discussion: smarter strategies
+
+- A colleague hands you a PhD dataset of 30 EEG trials. Which of the day's strategies do you reach for first? Why?
+- Several methods (pseudo-labeling, MAML, augmentation) amplify whatever assumptions the model already had. When is that good, when dangerous?
+- Pick one cognitive analog we invoked today and argue that it is *misleading* rather than helpful.
+
+---
+
+## Module 3 wrap
+
+- Active learning is adaptive experimental design with a loss function.
+- Choosing *what* to label is often more useful than labeling more.
+- Meta-learning is the formal version of "learning to learn".
+- Every section of PML Ch. 19 now has a result on the same EEG dataset.
+
+---
+
+# Wrap {.center background-color="#1a1a1a"}
+
+16:50 - 17:00
+
+---
+
+## The day in one table
+
+::: {.list-table}
+- - PML
+  - Strategy
+  - Notebook
+  - Cog-sci analog
+
+- - 19.1
+  - Augmentation
+  - single
+  - Invariances learned through play
+
+- - 19.2
+  - Transfer learning
+  - transfer
+  - Adult learning a new language
+
+- - 19.3
+  - Semi-supervised (pseudo-labels)
+  - single
+  - Skimming after careful reading
+
+- - 19.4
+  - Active learning
+  - active
+  - Adaptive psychophysics (QUEST)
+
+- - 19.5
+  - Meta-learning (MAML)
+  - active
+  - Harlow's learning sets (1949)
+
+- - 19.6
+  - Few-shot calibration
+  - transfer
+  - Lake et al. one-shot category learning
+
+- - 19.7
+  - Weakly supervised (smoothing)
+  - single
+  - Trusting noisy authorities, Bayes-style
+:::
+
+Each one is a different way to make a model behave like a learner that already had a brain before the data arrived. They are re-inventions, in a different vocabulary, of **priors**.
+
+---
+
+## What to read next
+
+- The PML book (Murphy 2022), Chapter 19.
+- Lake, Salakhutdinov, Tenenbaum (2015). "Human-level concept learning through probabilistic program induction." *Science*.
+- Lake, Ullman, Tenenbaum, Gershman (2017). "Building machines that learn and think like people." *BBS*.
+- Schirrmeister et al. (2017). "Deep learning with convolutional neural networks for EEG decoding and visualization." *Human Brain Mapping*.
+- Yamins & DiCarlo (2016). "Using goal-driven deep learning models to understand sensory cortex." *Nature Neuroscience*.
+
+---
+
+## Thank you {.center}
+
+Slides and notebooks: github.com/ccs-unilu/few2026
+
+Questions, complaints, and existential crises: morteza.ansarinia@uni.lu

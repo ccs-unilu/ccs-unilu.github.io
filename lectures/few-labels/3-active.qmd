@@ -1,0 +1,307 @@
+# Asking Smarter Questions
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/3-active.ipynb)
+
+**Time.** 15:30 - 17:00 (~90 min).
+
+**Goal.** Notebooks 1 and 2 worked on the data we had or borrowed. Here we change *what* we ask of the data, not what data we have. We will see two strategies:
+
+1. **Active learning (PML 19.4)**: choose which labels to acquire next.
+2. **Meta-learning (PML 19.5)**: learn an algorithm that adapts quickly to each new tasks/subject.
+
+---
+
+## 0. Setup
+
+- learn2learn: A PyTorch meta-learning library. We use it for the MAML demo.
+
+```{python}
+%%capture
+!pip install -q moabb braindecode seaborn learn2learn
+```
+
+```{python}
+import os, copy, warnings
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import mne
+import torch
+import torch.nn.functional as F
+
+from moabb.datasets import PhysionetMI
+from moabb.paradigms import LeftRightImagery
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from scipy.signal import welch
+from braindecode.models import EEGNetv4
+from braindecode import EEGClassifier
+
+sns.set_theme(context="notebook", style="whitegrid")
+mne.set_log_level("WARNING")
+np.random.seed(42); torch.manual_seed(42)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Setup complete. Device: {device}")
+```
+
+```{python}
+#@title Helpers (run once, then collapse) { display-mode: "form" }
+
+BANDS = (("alpha", 8, 13), ("beta", 13, 30))
+
+
+def extract_bandpower(X, sfreq=160, bands=BANDS):
+    """Log bandpower per trial x channel x band; flattened."""
+    f, psd = welch(X, fs=sfreq, nperseg=min(256, X.shape[-1]), axis=-1)
+    powers = np.stack([psd[..., (f >= lo) & (f <= hi)].mean(-1) for _, lo, hi in bands], axis=-1)
+    return np.log(powers + 1e-12).reshape(len(X), -1).astype(np.float32)
+
+
+def logistic_model(C=1.0):
+    return make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000, C=C))
+
+
+def build_eegnet(epochs=20, lr=0.001, batch=32):
+    return EEGClassifier(
+        EEGNetv4, module__n_chans=n_chans, module__n_outputs=2, module__n_times=n_times,
+        optimizer=torch.optim.AdamW, optimizer__lr=lr, optimizer__weight_decay=0.01,
+        train_split=None, batch_size=batch, max_epochs=epochs, device=device, verbose=0,
+    )
+
+
+def pick_random(n_pool, n_total, seed=0):
+    return np.random.RandomState(seed).permutation(n_pool)[:n_total].tolist()
+
+
+def pick_uncertain(X_pool, y_pool, n_initial, n_total, seed=0):
+    """Iteratively add the most uncertain unlabeled data."""
+    rng = np.random.RandomState(seed)
+    pool = pd.Index(range(len(X_pool)))
+    selected = pool.to_series().sample(n_initial, random_state=seed).tolist()
+    while len(selected) < n_total:
+        remaining = pool.difference(selected).to_numpy()
+        pipe = logistic_model().fit(X_pool[selected], y_pool[selected])
+        proba = pipe.predict_proba(X_pool[remaining])
+        uncertainty = 1.0 - np.abs(proba[:, 0] - 0.5) * 2
+        selected.append(int(remaining[np.argmax(uncertainty)]))
+    return selected
+
+
+```
+
+---
+
+## 1. Data and Pretrained Model
+
+```{python}
+dataset = PhysionetMI()
+paradigm = LeftRightImagery()
+subjects = list(range(1, 11))
+X, y, metadata = paradigm.get_data(dataset=dataset, subjects=subjects)
+
+X = X.astype(np.float32)
+y_int = LabelEncoder().fit_transform(y)
+sfreq = 160
+n_chans, n_times = X.shape[1], X.shape[2]
+features = extract_bandpower(X)
+features.shape
+```
+
+```{python}
+PRETRAINED_PATH = "/content/eegnet_pretrained.pt"
+target_subject = 1
+source_mask = (metadata["subject"] != target_subject).values
+
+clf_pretrained = build_eegnet(epochs=30)
+clf_pretrained.initialize()
+if os.path.exists(PRETRAINED_PATH):
+    print("Loading pretrained EEGNet from disk")
+    clf_pretrained.load_params(f_params=PRETRAINED_PATH)
+else:
+    print("No checkpoint found, retraining (2-3 minutes)")
+    clf_pretrained.fit(X[source_mask], y_int[source_mask])
+    clf_pretrained.save_params(f_params=PRETRAINED_PATH)
+print("Pretrained model ready.")
+```
+
+---
+
+## 2. Active Learning
+
+You have a pool of unlabeled data; knowing each label costs something (e.g., in BCI: a calibration trial). What is the cheapest order to ask for labels?
+
+- **Random**: shuffle the pool, label the first N. Every example equally informative.
+- **Uncertainty sampling**: train on a tiny subset, then iteratively pick the unlabeled example the model is least certain about, label it, retrain.
+
+Data that the model is already confident about is not worth labeling, because it won't change the model much. Data near the decision boundary is worth labeling, because it will change the model a lot. The questions that buy the most information are the ones whose answers you cannot predict.
+
+Pool = S1 trials minus a 1/3 test set.
+
+```{python}
+mask_target = (metadata["subject"] == target_subject).values
+f_target, y_target = features[mask_target], y_int[mask_target]
+
+test_idx = (pd.Series(np.arange(len(y_target))).groupby(y_target)
+            .sample(frac=1/3, random_state=0).to_numpy())
+pool_idx = np.setdiff1d(np.arange(len(y_target)), test_idx)
+f_pool, y_pool = f_target[pool_idx], y_target[pool_idx]
+f_test, y_test = f_target[test_idx], y_target[test_idx]
+print(f"Pool: {len(y_pool)}, Test: {len(y_test)}")
+```
+
+```{python}
+rows = []
+for budget in [5, 10, 15, 20, 25, 30]:
+    for strategy in ["random", "uncertainty"]:
+        accs = []
+        for seed in range(10):
+            if strategy == "random":
+                chosen = pick_random(len(f_pool), budget, seed=seed)
+            else:
+                chosen = pick_uncertain(f_pool, y_pool, n_initial=4,
+                                        n_total=budget, seed=seed)
+            model = logistic_model().fit(f_pool[chosen], y_pool[chosen])
+            accs.append(model.score(f_test, y_test))
+        rows.append({"budget": budget, "strategy": strategy,
+                     "mean": np.mean(accs), "std": np.std(accs)})
+
+results_active = pd.DataFrame(rows)
+results_active
+```
+
+```{python}
+sns.lineplot(data=results_active, x="budget", y="mean", hue="strategy", marker="o")
+plt.axhline(0.5, ls="--", c="k", alpha=0.5)
+plt.show()
+```
+
+Uncertainty should sit above random at first. They often converge later one. If uncertainty is *worse* than random in your run, increase `n_initial`; with too few seeds, early uncertainty estimates are unreliable.
+
+---
+
+## 3. Meta-learning
+
+Standard pretraining finds one good initialization. **MAML** asks for something stronger: an initialization such that *a few training steps* on a target domain yield a good model.
+
+Meta-train episodes: each episode picks a subject, splits its data into support + query, train on support. MAML is learning the **prior** over task parameters (PML 19.5).
+
+```{python}
+import learn2learn as l2l
+source_subjects = [s for s in subjects if s != target_subject]
+
+
+def sample_episode(subject_id, k_shot=5, q_shot=10, seed=0):
+    """Build one meta-learning episode for one subject.
+
+    Returns four tensors:
+      - support (X, y): k_shot trials per class - the model adapts on these.
+      - query   (X, y): q_shot trials per class - the meta-loss evaluates here.
+    """
+    rng = np.random.RandomState(seed)
+    m = (metadata["subject"] == subject_id).values
+    Xs, ys = X[m], y_int[m]
+
+    sup_X, sup_y, qry_X, qry_y = [], [], [], []
+    for c in np.unique(ys):
+        idx = np.where(ys == c)[0]
+        if len(idx) < k_shot + q_shot:
+            return None
+        chosen = rng.choice(idx, size=k_shot + q_shot, replace=False)
+        sup_X.append(Xs[chosen[:k_shot]]);  sup_y.append(np.full(k_shot, c))
+        qry_X.append(Xs[chosen[k_shot:]]);  qry_y.append(np.full(q_shot, c))
+
+    def stack_to_torch(X_parts, y_parts):
+        return (torch.from_numpy(np.concatenate(X_parts)).to(device),
+                torch.tensor(np.concatenate(y_parts), dtype=torch.long).to(device))
+
+    sup_X_t, sup_y_t = stack_to_torch(sup_X, sup_y)
+    qry_X_t, qry_y_t = stack_to_torch(qry_X, qry_y)
+    return sup_X_t, sup_y_t, qry_X_t, qry_y_t
+
+
+base_model = EEGNetv4(n_chans=n_chans, n_outputs=2, n_times=n_times).to(device)
+maml = l2l.algorithms.MAML(base_model, lr=0.01, first_order=True,
+                            allow_unused=True, allow_nograd=True)
+optimizer = torch.optim.Adam(maml.parameters(), lr=0.001)
+
+losses = []
+for iteration in range(80):
+    optimizer.zero_grad()
+    meta_loss, n_tasks = 0.0, 0
+    rng_iter = np.random.RandomState(iteration)
+    for task_subj in rng_iter.choice(source_subjects, size=4, replace=False):
+        ep = sample_episode(task_subj, k_shot=5, q_shot=10,
+                            seed=iteration * 7 + int(task_subj))
+        if ep is None:
+            continue
+        sup_X, sup_y, qry_X, qry_y = ep
+        learner = maml.clone()
+        for _ in range(3):  # inner steps
+            learner.adapt(F.cross_entropy(learner(sup_X), sup_y))
+        meta_loss = meta_loss + F.cross_entropy(learner(qry_X), qry_y)
+        n_tasks += 1
+    if n_tasks > 0:
+        meta_loss = meta_loss / n_tasks
+        meta_loss.backward(); optimizer.step()
+        losses.append(meta_loss.item())
+    if iteration % 20 == 0:
+        print(f"Meta-iter {iteration}: meta-loss = {losses[-1] if losses else float('nan'):.4f}")
+
+print("MAML training done.")
+```
+
+A converging run shows loss trending down. Flat or rising means the inner model is wrong or the batch is too small.
+
+```{python}
+sns.lineplot(x=range(len(losses)), y=losses)
+plt.show()
+```
+
+### Compare MAML vs pretraining + fine-tune
+
+```{python}
+def kshot_split(X_t, y_t, k_shot, seed=0):
+    rng = np.random.RandomState(seed)
+    sup_idx = np.concatenate([
+        rng.choice(np.where(y_t == c)[0], size=k_shot, replace=False)
+        for c in np.unique(y_t)
+    ])
+    qry_idx = np.setdiff1d(np.arange(len(y_t)), sup_idx)
+    return sup_idx, qry_idx
+
+
+def maml_eval(maml, X_t, y_t, k_shot=5, inner_steps=5, seed=0):
+    sup_idx, qry_idx = kshot_split(X_t, y_t, k_shot, seed=seed)
+    sup_X = torch.from_numpy(X_t[sup_idx]).to(device)
+    sup_y = torch.tensor(y_t[sup_idx], dtype=torch.long).to(device)
+    qry_X = torch.from_numpy(X_t[qry_idx]).to(device)
+    qry_y = torch.tensor(y_t[qry_idx], dtype=torch.long).to(device)
+    learner = maml.clone()
+    for _ in range(inner_steps):
+        learner.adapt(F.cross_entropy(learner(sup_X), sup_y))
+    with torch.no_grad():
+        return (learner(qry_X).argmax(1) == qry_y).float().mean().item()
+
+
+def pretrained_eval(clf_pretrained, X_t, y_t, k_shot=5, seed=0):
+    sup_idx, qry_idx = kshot_split(X_t, y_t, k_shot, seed=seed)
+    clf = copy.deepcopy(clf_pretrained).set_params(max_epochs=15, optimizer__lr=0.0003)
+    clf.partial_fit(X_t[sup_idx], y_t[sup_idx])
+    return clf.score(X_t[qry_idx], y_t[qry_idx])
+
+
+X_t = X[(metadata["subject"] == target_subject).values]
+y_t = y_int[(metadata["subject"] == target_subject).values]
+
+maml_accs = [maml_eval(maml, X_t, y_t, k_shot=5, seed=s) for s in range(5)]
+pretrained_accs = [pretrained_eval(clf_pretrained, X_t, y_t, k_shot=5, seed=s) for s in range(5)]
+
+print(f"Pretrained + fine-tune (k=5): {np.mean(pretrained_accs):.3f} ± {np.std(pretrained_accs):.3f}")
+print(f"MAML adapt           (k=5): {np.mean(maml_accs):.3f} ± {np.std(maml_accs):.3f}")
+```
+
+MAML sometimes wins and sometimes loses. The point is that the curves *exist* and the costs are comparable. Whether the extra meta-training is worth it depends on whether you will adapt to many new subjects.
