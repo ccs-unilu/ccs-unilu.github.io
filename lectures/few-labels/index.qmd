@@ -11,13 +11,13 @@ The day works through the PML book's chapter 19 in code, on motor imagery EEG (P
 
 | Module | Time | Notebook | PML | Colab |
 |---|---|---|---|---|
-| 1 | 10:00-12:00 | `01_single.qmd` - Working with What You Have | 19.1, 19.3, 19.7 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/1-single.ipynb) |
+| 1 | 10:00-12:00 | `1-single` - Working with What You Have | 19.1, 19.3, 19.7 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/1-single.ipynb) |
 | - | 12:00-13:00 | Break | - | - |
-| 2 | 13:00-15:00 | `02_transfer.qmd` - Help from Other Datasets and Tasks | 19.2, 19.6 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/2-transfer.ipynb) |
+| 2 | 13:00-15:00 | `2-transfer` - Help from Other Datasets and Tasks | 19.2, 19.6 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/2-transfer.ipynb) |
 | - | 15:00-15:15 | Break | - | - |
-| 3 | 15:15-17:00 | `03_active.qmd` - Asking Smarter Questions | 19.4, 19.5 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/3-active.ipynb) |
+| 3 | 15:15-17:00 | `3-active` - Asking Smarter Questions | 19.4, 19.5 | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ccs-unilu/ccs-unilu.github.io/blob/main/lectures/few-labels/3-active.ipynb) |
 
-All the notebooks are self-contained. But you can reuse the pretrained model from `02_transfer` in `03_active`.
+All the notebooks are self-contained. But you can reuse the pretrained model from notebook 2 in notebook 3 if you like. There is an optional text analysis in notebook 2, but you can skip it if you like (and it's not needed for notebook 3).
 
 ## Topics
 
