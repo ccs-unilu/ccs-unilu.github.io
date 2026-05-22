@@ -204,7 +204,7 @@ Train a classifier, watch it fail when labels are scarce, then apply four fixes 
 
 Imagine clenching your left fist. Without moving. Now your right.
 
-A small, reliable change happens in your sensorimotor cortex: the alpha (8–13 Hz) and beta (13–30 Hz) rhythms over the **contralateral** hemisphere weaken. This is **event-related desynchronization** (ERD).
+A small, reliable change happens in your sensorimotor cortex: the alpha (8-13 Hz) and beta (13-30 Hz) rhythms over the **contralateral** hemisphere weaken. This is **event-related desynchronization** (ERD).
 
 If we can measure ERD, we can decode which hand you imagined.
 
@@ -268,7 +268,7 @@ This is the **central failure of Ch. 19.** Every fix below is a different way to
 
 ## Fix 1: Riemannian tangent space
 
-Each trial gives a channel covariance matrix $C_i$. These live on a curved manifold — the cone of symmetric positive-definite matrices, $\mathrm{SPD}(64)$.
+Each trial gives a channel covariance matrix $C_i$. These live on a curved manifold - the cone of symmetric positive-definite matrices, $\mathrm{SPD}(64)$.
 
 Project to a flat tangent space at the geometric mean $\bar C$, then a standard linear classifier can eat them:
 
@@ -310,7 +310,7 @@ Standard cross-entropy demands "class 1, 100% certain". Label smoothing softens 
 
 $$\tilde y_k = (1-\varepsilon)\,[\,k = y\,] + \frac{\varepsilon}{K}, \qquad \mathcal L = -\sum_k \tilde y_k \log p_\theta(k\mid x)$$
 
-With $K=2,\ \varepsilon=0.1$ the target is $(0.9, 0.1)$ — the model never gets infinite gradient pressure to fit a single label. We corrupt 10–30% of labels and watch it degrade gracefully.
+With $K=2,\ \varepsilon=0.1$ the target is $(0.9, 0.1)$ — the model never gets infinite gradient pressure to fit a single label. We corrupt 10-30% of labels and watch it degrade gracefully.
 
 ---
 
@@ -401,7 +401,7 @@ Same paradigm, different brain. Train on subject 1, test on subject 2, **zero ca
 
 Sweep all 10 subjects in both directions:
 
-- within-subject accuracy: **0.65–0.85**
+- within-subject accuracy: **0.65-0.85**
 - cross-subject accuracy: **near 0.55**
 
 That gap is the second failure of Ch. 19. The whole afternoon is about closing it.
@@ -435,12 +435,12 @@ Run three feature extractors on the target subject, train the *same* logistic re
   - 2010s
   - Cheap
 
-- - Pretrained EEGNet penultimate
+- - Pretrained EEGNet
   - 2020s
   - One forward pass
 :::
 
-The pretrained penultimate sits above both hand-engineered baselines. **Borrowing pays even when the network never touches the target.**
+The pretrained model sits above both hand-engineered baselines. **Borrowing pays even when the network never touches the target.**
 
 ---
 
@@ -545,7 +545,7 @@ Notebooks 1 and 2 worked on the data we had or borrowed. Now change **what we as
 
 - Same **T4 GPU** runtime.
 - Install cell adds `learn2learn` for the MAML demo.
-- It reloads `/content/eegnet_pretrained.pt` from notebook 2. If the session was reset, it retrains in 2–3 min — harmless.
+- It reloads `/content/eegnet_pretrained.pt` from notebook 2. If the session was reset, it retrains in 2-3 min -- harmless.
 
 ---
 

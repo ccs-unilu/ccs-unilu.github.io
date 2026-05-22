@@ -26,7 +26,7 @@ We use:
 
 ```{python}
 %%capture
-!uv install -q seaborn moabb pyriemann braindecode
+!pip install -q seaborn moabb pyriemann braindecode
 ```
 
 ```{python}
@@ -402,7 +402,7 @@ Here, we briefly train a small EEGNet from scratch. The details don't matter; th
 ```{python}
 def build_small_eegnet(label_smoothing=0.0, epochs=15, lr=0.001):
     return EEGClassifier(
-        EEGNet,
+        EEGNetv4,
         module__n_chans=n_chans, module__n_outputs=2, module__n_times=n_timepoints,
         criterion=torch.nn.CrossEntropyLoss, criterion__label_smoothing=label_smoothing,
         optimizer=torch.optim.AdamW, optimizer__lr=lr, optimizer__weight_decay=0.01,
@@ -468,7 +468,7 @@ def acc_feat(features, y_arr, n_per_class=10, n_seeds=10, augment_fn=None, raw=N
 
 
 # Pseudo-labels
-def acc_pseudo(features, y_arr, n_per_class=N, n_seeds=10):
+def acc_pseudo(features, y_arr, n_per_class=10, n_seeds=10):
     accs = []
     for seed in range(n_seeds):
         h = pseudo_label_run(features, y_arr, n_per_class, n_rounds=4, threshold=0.85, seed=seed)
@@ -484,8 +484,9 @@ summary = pd.DataFrame([
 ])
 
 sns.barplot(data=summary, x="technique", y="accuracy")
-sns.axhline(0.5, ls="--", c="k", alpha=0.5)
-sns.set_title(f"Label scarcity (N={N} per class)")
+plt.axhline(0.5, ls="--", c="k", alpha=0.5)
+plt.title("Label scarcity (10 per class)")
+plt.show()
 
 ```
 

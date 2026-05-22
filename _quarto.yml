@@ -1,5 +1,11 @@
 project:
   type: website
+  render:
+    - "*.qmd"
+    - "lectures/**/*.qmd"
+    - "!lectures/few-labels/1-single.qmd"
+    - "!lectures/few-labels/2-transfer.qmd"
+    - "!lectures/few-labels/3-active.qmd"
 
 website:
   title: "Computational Cognitive Sciences Course - University of Luxembourg"

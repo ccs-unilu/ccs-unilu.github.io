@@ -42,7 +42,7 @@ from scipy.signal import welch
 from pyriemann.estimation import Covariances
 from pyriemann.tangentspace import TangentSpace
 
-from braindecode.models import EEGNet
+from braindecode.models import EEGNetv4
 from braindecode import EEGClassifier
 
 sns.set_theme(context="notebook", style="whitegrid")
@@ -55,44 +55,48 @@ print(f"Setup complete. Device: {device}")
 ```{python}
 #@title Helpers (run once, then collapse) { display-mode: "form" }
 
-BANDS = (("alpha", 8, 13), ("beta", 13, 30))
+FREQ_BANDS = (("alpha", 8, 13), ("beta", 13, 30))
 
 
-def extract_bandpower(Xin, sfreq=160, bands=BANDS):
-    f, psd = welch(Xin, fs=sfreq, nperseg=min(256, Xin.shape[-1]), axis=-1)
+def extract_bandpower(Xin, sampling_freq=160, bands=FREQ_BANDS):
+    """Log bandpower per trial × channel × band, flattened."""
+    f, psd = welch(Xin, fs=sampling_freq, nperseg=min(256, Xin.shape[-1]), axis=-1)
     powers = np.stack([psd[..., (f >= lo) & (f <= hi)].mean(-1) for _, lo, hi in bands], axis=-1)
+
+    # +1e-12 to avoid log(0)
     return np.log(powers + 1e-12).reshape(len(Xin), -1).astype(np.float32)
 
 
 def balanced_split(X_t, y_t, n_per_class, seed=0):
+    """Balanced split: n_per_class*n_class trials as 'train', the rest as 'test'."""
     rng = np.random.RandomState(seed)
-    chosen = np.concatenate([
+    train_idx = np.concatenate([
         rng.choice(np.where(y_t == c)[0], size=n_per_class, replace=False)
         for c in np.unique(y_t)
     ])
-    rest = np.setdiff1d(np.arange(len(y_t)), chosen)
-    return X_t[chosen], y_t[chosen], X_t[rest], y_t[rest]
+    test_idx = np.setdiff1d(np.arange(len(y_t)), train_idx)
+    return X_t[train_idx], y_t[train_idx], X_t[test_idx], y_t[test_idx]
 
 
 def logistic_model(C=1.0):
     return make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000, C=C))
 
 
-def compute_learning_curve(features, y_arr, n_list=(5, 10, 20, 40), n_seeds=10):
+def compute_learning_curve(X, y, sample_sizes=(5, 10, 20, 40), n_seeds=10):
     rows = []
-    for n in n_list:
+    for n in sample_sizes:
         accs = []
         for seed in range(n_seeds):
-            Xtr, ytr, Xte, yte = balanced_split(features, y_arr, n, seed=seed)
+            Xtr, ytr, Xte, yte = balanced_split(X, y, n, seed=seed)
             accs.append(logistic_model().fit(Xtr, ytr).score(Xte, yte))
         rows.append({"n_per_class": n, "mean": np.mean(accs), "std": np.std(accs)})
     return pd.DataFrame(rows)
 
 
-def build_eegnet(n_chans, n_times, epochs=20, lr=0.001, batch=32):
+def build_eegnet(n_chans, n_timepoints, epochs=20, lr=0.001, batch=32):
     return EEGClassifier(
         EEGNetv4,
-        module__n_chans=n_chans, module__n_outputs=2, module__n_times=n_times,
+        module__n_chans=n_chans, module__n_outputs=2, module__n_times=n_timepoints,
         optimizer=torch.optim.AdamW, optimizer__lr=lr, optimizer__weight_decay=0.01,
         train_split=None, batch_size=batch, max_epochs=epochs, device=device, verbose=0,
     )
@@ -103,24 +107,27 @@ def time_shift(x, max_shift=20, rng=None):
     return np.roll(x, rng.randint(-max_shift, max_shift + 1), axis=-1)
 
 
-def channel_dropout(x, p=0.05, rng=None):
+def channel_dropout(x, p=0.1, rng=None):
+    """Zero out each channel with probability p."""
     rng = rng or np.random
     out = x.copy()
     out[rng.rand(x.shape[0]) <= p] = 0
     return out
 
 
-def add_gaussian_noise(x, sigma=0.05, rng=None):
+def gaussian_noise(x, sigma=0.1, rng=None):
+    """Add white noise scaled by sigma x trial std."""
     rng = rng or np.random
     return x + rng.randn(*x.shape).astype(x.dtype) * x.std() * sigma
 
 
 def augment_trials(X_in, y_in, n_copies=3, rng=None):
+    """Helper to apply multiple augmentation techniques."""
     rng = rng or np.random.RandomState(0)
     X_list, y_list = [X_in], [y_in]
     for _ in range(n_copies):
         X_aug = np.stack([
-            add_gaussian_noise(channel_dropout(time_shift(x, rng=rng), rng=rng), rng=rng)
+            gaussian_noise(channel_dropout(time_shift(x, rng=rng), p=0.05, rng=rng), sigma=0.05, rng=rng)
             for x in X_in
         ])
         X_list.append(X_aug); y_list.append(y_in)
@@ -140,17 +147,17 @@ subjects = list(range(1, 11))
 X, y, metadata = paradigm.get_data(dataset=dataset, subjects=subjects)
 
 X = X.astype(np.float32)
-y_int = LabelEncoder().fit_transform(y)
-sfreq = 160
-n_chans, n_times = X.shape[1], X.shape[2]
+y_encoded = LabelEncoder().fit_transform(y)
+sampling_freq = 160
+n_chans, n_timepoints = X.shape[1], X.shape[2]
 
 target_subject = 1
 target_mask = (metadata["subject"] == target_subject).values
 source_mask = ~target_mask
 
-X_target_all, y_target_all = X[target_mask], y_int[target_mask]
-X_source, y_source = X[source_mask], y_int[source_mask]
-print(f"Target S{target_subject}: {len(y_target_all)} trials | Source (other 9): {len(y_source)} trials")
+X_s1, y_s1 = X[target_mask], y_encoded[target_mask]
+X_source, y_source = X[source_mask], y_encoded[source_mask]
+print(f"Target S{target_subject}: {len(y_s1)} trials | Source (other 9): {len(y_source)} trials")
 ```
 
 ---
@@ -164,13 +171,13 @@ features_bp = extract_bandpower(X)
 cross_rows = []
 for s_train in subjects:
     pipe = logistic_model().fit(features_bp[(metadata["subject"] == s_train).values],
-                          y_int[(metadata["subject"] == s_train).values])
+                          y_encoded[(metadata["subject"] == s_train).values])
     for s_test in subjects:
         if s_test == s_train:
             continue
         m_test = (metadata["subject"] == s_test).values
         cross_rows.append({"source": s_train, "target": s_test,
-                           "accuracy": pipe.score(features_bp[m_test], y_int[m_test])})
+                           "accuracy": pipe.score(features_bp[m_test], y_encoded[m_test])})
 results_cross = pd.DataFrame(cross_rows)
 print(f"Mean cross-subject accuracy: {results_cross['accuracy'].mean():.3f}  "
       f"(min {results_cross['accuracy'].min():.3f}, max {results_cross['accuracy'].max():.3f})")
@@ -183,7 +190,7 @@ within = pd.DataFrame([
     {"subject": s,
      "accuracy": cross_val_score(logistic_model(),
                                  features_bp[(metadata["subject"] == s).values],
-                                 y_int[(metadata["subject"] == s).values],
+                                 y_encoded[(metadata["subject"] == s).values],
                                  cv=5).mean(),
      "regime": "within (all labels)"}
     for s in subjects
@@ -209,7 +216,7 @@ Train a small EEGNet on the source domain and save the checkpoint.
 ```{python}
 CHECKPOINT_PATH = "/content/eegnet_pretrained.pt"
 
-clf_pretrained = build_eegnet(n_chans, n_times, epochs=30)
+clf_pretrained = build_eegnet(n_chans, n_timepoints, epochs=30)
 
 if os.path.exists(CHECKPOINT_PATH):
     print("Loading pretrained EEGNet from disk")
@@ -237,11 +244,11 @@ Run three feature extractors on S1's trials, train a small linear regression on 
 | Pretrained | 2020s | One forward pass |
 
 ```{python}
-bp_s1 = extract_bandpower(X_target_all)
+power_s1 = extract_bandpower(X_s1)
 ri_s1 = TangentSpace().fit_transform(
-    Covariances(estimator="oas").fit_transform(X_target_all)
+    Covariances(estimator="oas").fit_transform(X_s1)
 ).astype(np.float32)
-print(f"Bandpower: {bp_s1.shape}  |  Tangent: {ri_s1.shape}")
+print(f"Bandpower: {power_s1.shape}  |  Tangent: {ri_s1.shape}")
 ```
 
 Pull the EEGNet via a forward hook on the final layer's input.
@@ -254,20 +261,20 @@ handle = backbone.final_layer.register_forward_hook(
     lambda m, inp, out: penult_buffer.append(inp[0].detach().cpu().numpy()))
 
 with torch.no_grad():
-    for i in range(0, len(X_target_all), 64):
-        backbone(torch.from_numpy(X_target_all[i:i+64]).to(device))
+    for i in range(0, len(X_s1), 64):
+        backbone(torch.from_numpy(X_s1[i:i+64]).to(device))
 handle.remove()
 
 en_s1 = np.concatenate([f.reshape(f.shape[0], -1) for f in penult_buffer]).astype(np.float32)
-print(f"EEGNet penultimate: {en_s1.shape}")
+print(f"EEGNet: {en_s1.shape}")
 ```
 
 
 ```{python}
 curves = pd.concat({
-    "bandpower (1990s)":       compute_learning_curve(bp_s1, y_target_all),
-    "Riemannian (2010s)":      compute_learning_curve(ri_s1, y_target_all),
-    "EEGNet penultimate (borrowed)": compute_learning_curve(en_s1, y_target_all),
+    "bandpower":       compute_learning_curve(power_s1, y_s1),
+    "Tangent":      compute_learning_curve(ri_s1, y_s1),
+    "EEGNet (borrowed)": compute_learning_curve(en_s1, y_s1),
 }, names=["features"]).reset_index(level=0)
 
 sns.lineplot(data=curves, x="n_per_class", y="mean", hue="features", marker="o")
@@ -286,7 +293,7 @@ Now we have a pretrained model, but it's not perfect. We can fine-tune it on the
 ```{python}
 n_target = 20
 X_t_train, y_t_train, X_t_test, y_t_test = balanced_split(
-    X_target_all, y_target_all, n_per_class=n_target, seed=0
+    X_s1, y_s1, n_per_class=n_target, seed=0
 )
 print(f"Target train: {len(y_t_train)}  |  Target test: {len(y_t_test)}")
 ```
@@ -295,7 +302,7 @@ print(f"Target train: {len(y_t_train)}  |  Target test: {len(y_t_test)}")
 scores = {}
 
 # (i) from scratch on the target alone
-scratch = build_eegnet(n_chans, n_times, epochs=20)
+scratch = build_eegnet(n_chans, n_timepoints, epochs=20)
 scratch.fit(X_t_train, y_t_train)
 scores["from scratch (20 trials)"] = scratch.score(X_t_test, y_t_test)
 
@@ -316,7 +323,7 @@ ft_aug.set_params(max_epochs=15, optimizer__lr=0.0003)
 ft_aug.partial_fit(X_aug.astype(np.float32), y_aug)
 scores["fine-tuned + augmentation"] = ft_aug.score(X_t_test, y_t_test)
 
-scores_df = pd.Series(scores, name="accuracy").rename_axis("regime").reset_index()
+scores_df = pd.Series(scores, name="accuracy").rename_axis("strategy").reset_index()
 scores_df
 ```
 
@@ -338,11 +345,11 @@ Sample N target trials per class from {1, 2, 5, 10, 20, 50}, fine-tune the pretr
 ```{python}
 fewshot_rows = []
 for n in [1, 2, 5, 10, 20, 50]:
-    if 2 * n > len(y_target_all):
+    if 2 * n > len(y_s1):
         continue
     accs = []
     for seed in range(5):
-        Xtr, ytr, Xte, yte = balanced_split(X_target_all, y_target_all, n, seed=seed)
+        Xtr, ytr, Xte, yte = balanced_split(X_s1, y_s1, n, seed=seed)
         clf = copy.deepcopy(clf_pretrained).set_params(max_epochs=15, optimizer__lr=0.0003)
         accs.append(clf.partial_fit(Xtr, ytr).score(Xte, yte))
     fewshot_rows.append({"n_per_class": n, "mean": np.mean(accs), "std": np.std(accs)})
